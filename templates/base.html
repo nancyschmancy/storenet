@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+    <title>{% block title %} TITLE GOES HERE {% endblock %}</title>
+</head>
+<body>
+    <div id='login'>
+        {% if session['user_id'] %}
+            <a href='/logout'>Log out</a>
+        {% else %}
+            <form action='/login' method='POST'>
+                Enter user_id<input type='text' name='user_id'>
+                Enter password<input type='password' name='password'>
+                <input type='submit'>
+            </form> 
+        {% endif %}
+    </div>
+
+    {% if session %}
+        {% for message in get_flashed_messages() %}
+        <div id='flash'>
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block body %}
+    ALL THE STUFF GOES HERE
+    {% endblock %}
+</body>
+</html>
