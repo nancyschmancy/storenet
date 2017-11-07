@@ -29,7 +29,9 @@ class Store(db.Model):
     name = db.Column(db.String(255), nullable=False)
     address = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(14), nullable=False)
-    district_id = db.Column(db.String(3), db.ForeignKey('districts.district_id'), nullable=False)
+    district_id = db.Column(db.String(3),
+                            db.ForeignKey('districts.district_id'),
+                            nullable=False)
 
     district = db.relationship('District', backref='stores')
 
@@ -56,8 +58,10 @@ class Employee(db.Model):
     lname = db.Column(db.String(25), nullable=False)
     ssn = db.Column(db.String(11), nullable=False)
     password = db.Column(db.String(5), nullable=False)
-    store_id = db.Column(db.String(3), db.ForeignKey('stores.store_id'), nullable=False)
-    pos_id = db.Column(db.String(5), db.ForeignKey('positions.pos_id'), nullable=False)
+    store_id = db.Column(db.String(3), db.ForeignKey('stores.store_id'),
+                         nullable=False)
+    pos_id = db.Column(db.String(5), db.ForeignKey('positions.pos_id'),
+                       nullable=False)
 
     store = db.relationship('Store', backref='employees')
     position = db.relationship('Position', backref='employees')
@@ -65,7 +69,8 @@ class Employee(db.Model):
     def __repr__(self):
         """ This displays information about the employee. """
 
-        return '<Employee {}, {} {}>'.format(self.emp_id, self.fname, self.lname)
+        return '<Employee {}, {} {}>'.format(self.emp_id, self.fname,
+                                             self.lname)
 
 
 class Comm(db.Model):
@@ -73,14 +78,21 @@ class Comm(db.Model):
 
     __tablename__ = 'comms'
 
-    comm_id = db.Column(db.Integer, nullable=False, primary_key=True, autoincrement=True)
+    comm_id = db.Column(db.Integer, nullable=False, primary_key=True,
+                        autoincrement=True)
     title = db.Column(db.String(75), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     text = db.Column(db.Text, nullable=False)
     audience = db.Column(db.String(3))
-    pos_id = db.Column(db.String(5), db.ForeignKey('positions.pos_id'), nullable=True)
+    pos_id = db.Column(db.String(5), db.ForeignKey('positions.pos_id'),
+                       nullable=True)
 
     positions = db.relationship('Position', backref='comms')
+
+    def __repr__(self):
+        """ This displays information about the communication. """
+
+        return '<Communication {}, {}>'.format(self.comm_id, self.title)
 
 
 class Action(db.Model):
@@ -96,6 +108,11 @@ class Action(db.Model):
 
     comm = db.relationship('Comm', backref='action')
 
+    def __repr__(self):
+        """ This displays information about action for each communcation. """
+
+        return '<Action on {}>'.format(self.comm_id)
+
 
 class WasRead(db.Model):
     """ Read receipt."""
@@ -104,10 +121,16 @@ class WasRead(db.Model):
 
     comm_id = db.Column(db.Integer, db.ForeignKey('comms.comm_id'),
                         primary_key=True, nullable=False)
-    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'), nullable=False)
+    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
+                       nullable=False)
     was_read = db.Column(db.Boolean, nullable=False)
 
     employee = db.relationship('Employee', backref='was_read')
+
+    def __repr__(self):
+        """ This displays information about action for each communcation. """
+
+        return '<Was {} read? {}}>'.format(self.comm_id, self.was_read)
 
 ##############################################################################
 # Helper functions - NTS: find out what these do

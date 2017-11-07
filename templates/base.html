@@ -1,16 +1,17 @@
 <!doctype html>
 <html>
 <head>
-    <title>{% block title %} TITLE GOES HERE {% endblock %}</title>
+    <title>{% block title %} placeholder for title {% endblock %}</title>
 </head>
 <body>
     <div id='login'>
-        {% if session['user_id'] %}
+        {% if session.get('emp_id') %}  <!-- REMEMBER THIS! -->
+            You are logged in as {{ session['emp_name']}}. 
             <a href='/logout'>Log out</a>
         {% else %}
             <form action='/login' method='POST'>
-                Enter user_id<input type='text' name='user_id'>
-                Enter password<input type='password' name='password'>
+                Employee ID: <input type='text' name='emp_id'>
+                Password: <input type='password' name='password'>
                 <input type='submit'>
             </form> 
         {% endif %}
@@ -25,7 +26,9 @@
     {% endif %}
 
     {% block body %}
-    ALL THE STUFF GOES HERE
+
+    <p>Body here</p>
+    
     {% endblock %}
 </body>
 </html>

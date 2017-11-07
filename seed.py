@@ -93,7 +93,7 @@ def make_positions():
 
 
 def make_emps():
-    """ Make fake users and load into database. Has fname, lname, SSN, ph. """
+    """ Make fake users and load into database. """
 
     print 'Making Employees...'
 
@@ -102,7 +102,7 @@ def make_emps():
 
     # QUESTION: Hm, how do I solve for duplicates, though? *scratches head*
     for emp in range(1, 200):
-        emp_id = fake.random_number(5)  # emp_id is 5 digits long
+        emp_id = "{:0>5}".format(fake.random_number(5))  # emp_id is 5 digits long
         fname = fake.first_name()
         lname = fake.last_name()
         ssn = fake.ssn()
@@ -114,7 +114,10 @@ def make_emps():
             pos_id = mgmt_position[store_id].pop()
 
         # Instantiate an employee using class in model.py
-        emp = Employee(emp_id=emp_id, fname=fname, lname=lname, ssn=ssn, password=password, store_id=store_id, pos_id=pos_id)
+        emp = Employee(emp_id=emp_id, fname=fname,
+                       lname=lname, ssn=ssn,
+                       password=password, store_id=store_id,
+                       pos_id=pos_id)
 
         # Add employee to db
         db.session.add(emp)
@@ -150,9 +153,9 @@ def get_random_district():
 
 
 def get_position():
-    """ Helper function. Each store needs (1) Store Manager, (2) Assistant Managers. Everyone else
-    will be a Sales Associate. This function will create a list where these
-    positions can be popped from."""
+    """ Helper function. Each store needs (1) Store Manager, (2) Assistant
+    Managers. Everyone else will be a Sales Associate. This function will
+    create a list where these positions can be popped from."""
 
     # Generate a dictionary with store_id and a poppable list with mgmt pos.
     avail_positions = {}
@@ -173,7 +176,9 @@ def add_nancy():
                        phone='(415) 555-1234',
                        district_id='D99')
 
-    nancy = Employee(emp_id='09332', fname='Nancy', lname='Reyes', ssn='123-45-6789', password='f', store_id='999', pos_id='99-HQ')
+    nancy = Employee(emp_id='09332', fname='Nancy',
+                     lname='Reyes', ssn='123-45-6789',
+                     password='f', store_id='999', pos_id='99-HQ')
 
     db.session.add(corp_store)
     db.session.add(nancy)
