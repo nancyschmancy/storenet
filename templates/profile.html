@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block body %}
+
+<ul>
+    <li>{{ obj.emp_id }}</li>
+    <li>{{ obj.pos_id }}</li>
+    <li>{{ obj.fname }} {{ obj.lname }}</li>
+    <li>{{ obj.ssn }}</li>
+    <li>Store {{ obj.store.store_id }}</li>
+    <li>{{ obj.store.name }}</li>
+    <li>District {{ obj.store.district.name }}</li>
+    <li>{{ obj }}</li>
+</ul>
+
+{% endblock %}

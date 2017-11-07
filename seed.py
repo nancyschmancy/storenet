@@ -192,9 +192,9 @@ if __name__ == '__main__':
     db.create_all()
 
     # Import different types of data
-    # make_districts()
-    # make_stores()
-    # mgmt_position = get_position()
-    # make_positions()
-    # make_emps()
-    # add_nancy()
+    make_districts()
+    make_stores()
+    mgmt_position = get_position()
+    make_positions()
+    make_emps()
+    add_nancy()
