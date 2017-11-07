@@ -41,8 +41,6 @@ def login():
 
     session['user_id'] = user_id
 
-    print session
-
     flash('You are logged in as {} and you entered the password {}.'.format(user_id, password))
 
     return redirect('/')
