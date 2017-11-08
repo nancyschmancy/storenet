@@ -3,7 +3,7 @@
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, session, flash, request, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
-from model import Employee, connect_to_db, db
+from model import Employee, Store, connect_to_db, db
 
 app = Flask(__name__)
 
@@ -30,18 +30,19 @@ def index():
 def login():
     """ Processes login. """
 
-    form_emp_id = request.form.get('emp_id')
-    form_password = request.form.get('password')
+    form_emp_id = request.form.get('form_emp_id')
+    form_pw = request.form.get('form_pw')
+    employee = Employee.query.filter(Employee.emp_id == form_emp_id).first()
 
-    emp = Employee.query.filter(Employee.emp_id == form_emp_id).first()
-
-    if emp and form_password == emp.password:
-        session['emp_id'] = emp.emp_id
-        session['emp_name'] = "{} {}".format(emp.fname, emp.lname)
+    if employee and form_pw == employee.password:
+        session['emp_id'] = employee.emp_id
+        session['name'] = "{} {}".format(employee.fname, employee.lname)
+        session['pos_id'] = employee.pos_id
+        print session
     else:
         flash("Login didn't work. Try again.")
 
-    return render_template('profile.html', obj=emp)
+    return redirect('/')
 
 
 @app.route('/logout')
@@ -49,10 +50,27 @@ def logout():
     """ Logs user out. """
 
     session.clear()
-
     flash('You are logged out.')
-
     return redirect('/')
+
+
+@app.route('/profile')
+def view_profile():
+    """ View user profile. """
+
+    employee = Employee.query.filter(Employee.emp_id == session['emp_id']).first()
+
+    return render_template('profile.html', obj=employee)
+
+
+@app.route('/post')
+def post_comm():
+    """ Here, the almighty admin can post stuff. """
+
+    stores = Store.query.all()
+    # QUESTION: Is it better to make a list of stores or do in Jinja?
+
+    return render_template('post_comm.html', stores=stores)
 
 
 # ############################################################################

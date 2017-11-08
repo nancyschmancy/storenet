@@ -2,16 +2,36 @@
 <html>
 <head>
     <title>{% block title %} placeholder for title {% endblock %}</title>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 </head>
+
+
 <body>
-    <div id='login'>
+    <h1><a href='/'>Storenet</a></h1>
+
+    <div id='navbar'>
         {% if session.get('emp_id') %}  <!-- REMEMBER THIS! -->
-            You are logged in as {{ session['emp_name']}}. 
-            <a href='/logout'>Log out</a>
+            You are logged in as {{ session['name']}}. 
+            <a href='/logout'>Log out</a> | 
+            <a href='/profile'>View your profile</a>
+
+            {% if session.get('pos_id') == '01-SM' %}
+            | <a href='#'>SM only menu item</a>
+            {% endif %}
+
+            {% if session.get('pos_id') == '10-DM' %}
+            | <a href='#'>only DM can accessS - check somthing out</a>
+            {% endif %}
+
+            {% if session.get('pos_id') == '99-HQ' %}
+            | <a href='/post'>ADMIN ONLY: Post something</a>
+            {% endif %}
+
+
         {% else %}
-            <form action='/login' method='POST'>
-                Employee ID: <input type='text' name='emp_id'>
-                Password: <input type='password' name='password'>
+            <form action='/login' id='test-login' method='post'>
+                Employee ID: <input type='text' name='form_emp_id'>
+                Password: <input type='password' name='form_pw'>
                 <input type='submit'>
             </form> 
         {% endif %}
@@ -27,8 +47,34 @@
 
     {% block body %}
 
-    <p>Body here</p>
+    Code runs faster when Chuck Norris is watching it.
     
     {% endblock %}
 </body>
+
+
+<script type="text/javascript">
+
+// function completeLogin() {
+//     $('#test-login').html('results');
+// }
+
+// function userLogin(evt) {
+//     evt.preventDefault();
+
+//     console.log("I shall log you in");
+
+//     let form_input = {
+//                 "form_emp_id": $('#form_emp_id').val(),
+//                 "form_pw": $('form_pw').val()
+//                      }
+
+//     $.post("/login", form_input, completeLogin);
+// };
+
+// // And then this thing 'listens' for the submit
+// $('#test-login').on('submit', userLogin);
+
+// </script>
+
 </html>

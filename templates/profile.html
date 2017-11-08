@@ -4,6 +4,8 @@
 
 {% block body %}
 
+<h3>Details for {{ obj.fname }} {{ obj.lname}}</h3>
+
 <ul>
     <li>{{ obj.emp_id }}</li>
     <li>{{ obj.pos_id }}</li>
@@ -14,5 +16,10 @@
     <li>District {{ obj.store.district.name }}</li>
     <li>{{ obj }}</li>
 </ul>
+
+{% if obj.pos_id == "99-HQ" %}
+    <p>Admin information goes here</p>
+    <a href="post">Post some stuff here</a>
+{% endif %}
 
 {% endblock %}

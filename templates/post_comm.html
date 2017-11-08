@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Post a memo{% endblock %}
+
+{% block body %}
+
+<p>Greetings, almighty admin. You have the highest security clearance on this
+    amazing web app. Cheers!</p>
+
+<h3>What do you have to say?</h3>
+
+<form action='post-comm' id='post-comm' method='post'>
+    Title: <input type='text' name='title' required><br>
+    Send to:
+    <input type='checkbox' name='audience' value='ALL'> All stores
+    <input type='checkbox' name='audience' value='D01'> District 1
+    <input type='checkbox' name='audience' value='D02'> District 2
+    <input type='checkbox' name='audience' value='D03'> District 3
+    <input type='checkbox' name='audience' value='D04'> District 4
+    <input type='checkbox' name='audience' value='D05'> District 5
+    <input type='checkbox' name='audience' value='ALL-SM'> All District Managers
+    <br>
+    Or select a store:
+    <select>
+    {% for store in stores %}
+        <option value='{{ store.store_id }}'>{{ store.store_id }} {{ store.name }}
+        </option>
+    {% endfor %}
+    </select>
+    <br>
+    <textarea rows='20' cols='100' required>
+    </textarea>
+    <br>
+    <input type='submit'>
+</form
+
+
+
+
+
+{% endblock %}
