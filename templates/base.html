@@ -3,6 +3,7 @@
 <head>
     <title>{% block title %} placeholder for title {% endblock %}</title>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <link rel='stylesheet' type='text/css' href='/static/style.css'>
 </head>
 
 
@@ -12,8 +13,10 @@
     <div id='navbar'>
         {% if session.get('emp_id') %}  <!-- REMEMBER THIS! -->
             You are logged in as {{ session['name']}}. 
-            <a href='/logout'>Log out</a> | 
-            <a href='/profile'>View your profile</a>
+            <a href='/logout'>Log out</a>
+            | <a href='/profile'>Your profile</a>
+            | <a href='/view-stores'>Store Directory</a>
+
 
             {% if session.get('pos_id') == '01-SM' %}
             | <a href='#'>SM only menu item</a>

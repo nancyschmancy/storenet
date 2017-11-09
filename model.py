@@ -73,26 +73,26 @@ class Employee(db.Model):
                                              self.lname)
 
 
-class Comm(db.Model):
+class Post(db.Model):
     """ Making communication model thingy """
 
-    __tablename__ = 'comms'
+    __tablename__ = 'posts'
 
-    comm_id = db.Column(db.Integer, nullable=False, primary_key=True,
+    post_id = db.Column(db.Integer, nullable=False, primary_key=True,
                         autoincrement=True)
     title = db.Column(db.String(75), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     text = db.Column(db.Text, nullable=False)
     audience = db.Column(db.String(3))
-    pos_id = db.Column(db.String(5), db.ForeignKey('positions.pos_id'),
-                       nullable=True)
+    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
+                       nullable=False)
 
-    positions = db.relationship('Position', backref='comms')
+    employee = db.relationship('Employee', backref='posts')
 
     def __repr__(self):
         """ This displays information about the communication. """
 
-        return '<Communication {}, {}>'.format(self.comm_id, self.title)
+        return '<Post {}, {}>'.format(self.post_id, self.title)
 
 
 class Action(db.Model):
@@ -100,18 +100,18 @@ class Action(db.Model):
 
     __tablename__ = 'action'
 
-    comm_id = db.Column(db.Integer, db.ForeignKey('comms.comm_id'),
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'),
                         primary_key=True, nullable=False)
     complete = db.Column(db.Boolean)
     assigner = db.Column(db.String(5))
     assignee = db.Column(db.String(5))
 
-    comm = db.relationship('Comm', backref='action')
+    post = db.relationship('Post', backref='action')
 
     def __repr__(self):
         """ This displays information about action for each communcation. """
 
-        return '<Action on {}>'.format(self.comm_id)
+        return '<Action on {}>'.format(self.post_id)
 
 
 class WasRead(db.Model):
@@ -119,7 +119,7 @@ class WasRead(db.Model):
 
     __tablename__ = 'was_read'
 
-    comm_id = db.Column(db.Integer, db.ForeignKey('comms.comm_id'),
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'),
                         primary_key=True, nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
@@ -130,7 +130,7 @@ class WasRead(db.Model):
     def __repr__(self):
         """ This displays information about action for each communcation. """
 
-        return '<Was {} read? {}}>'.format(self.comm_id, self.was_read)
+        return '<Was {} read? {}}>'.format(self.post_id, self.was_read)
 
 ##############################################################################
 # Helper functions - NTS: find out what these do

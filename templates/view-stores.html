@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}All Stores{% endblock %}
+
+{% block body %}
+
+<h3>Store Directory</h3>
+<ul>
+{% for store in stores %}
+<li>{{ store.store_id}} {{ store.name}}<br>
+    {{ store.address }}<br>
+    {{ store.phone }}<br>
+    belongs to {{ store.district.name }} District<br>
+{% endfor %}
+</ul>
+
+<p>Chuck Norris can never fill out an online form, because Chuck Norris 
+    will never submit.</p>
+
+{% endblock %}

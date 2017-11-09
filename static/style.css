@@ -1,0 +1,9 @@
+body {
+    color: green;
+    font-family: 'Comic Sans MS';
+}
+
+#flash {
+    color: red;
+    border: 1px solid red;
+}

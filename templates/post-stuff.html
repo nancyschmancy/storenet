@@ -9,7 +9,7 @@
 
 <h3>What do you have to say?</h3>
 
-<form action='post-comm' id='post-comm' method='post'>
+<form action='/preview-post' id='post-comm' method='post'>
     Title: <input type='text' name='title' required><br>
     Send to:
     <input type='checkbox' name='audience' value='ALL'> All stores
@@ -23,14 +23,17 @@
     Or select a store:
     <select>
     {% for store in stores %}
-        <option value='{{ store.store_id }}'>{{ store.store_id }} {{ store.name }}
+        <option name='audience' value='{{ store.store_id }}'>
+            {{ store.store_id }} {{ store.name }}
         </option>
     {% endfor %}
     </select>
     <br>
-    <textarea rows='20' cols='100' required>
-    </textarea>
-    <br>
+    <textarea name='post-content' rows='20' cols='100' required></textarea><br>
+    Action required? <input type='checkbox' name='action' value='chuck_norris'>
+    <div id='flash'>Going to put this in a javascript thing that shows up when you click yes</div>
+    Action item: <input type='text/css' name='action_item'><br>
+    Deadline: <input type='date' name='deadline'>
     <input type='submit'>
 </form
 

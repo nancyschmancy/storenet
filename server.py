@@ -3,7 +3,8 @@
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, session, flash, request, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
-from model import Employee, Store, connect_to_db, db
+from model import Employee, Store, Post, connect_to_db, db
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -23,7 +24,24 @@ app.jinja_env.undefined = StrictUndefined
 def index():
     """ This is the homepage. Will probably change. """
 
-    return render_template('homepage.html')
+    posts = Post.query.all()  # get this to order in desc
+    return render_template('homepage.html', posts=posts)
+
+
+@app.route('/view-stores')
+def view_stores():
+    """ Displays a directory of all stores. """
+
+    stores = Store.query.order_by('district_id').all()  # get this to be in order
+    # package up the list of Store Managers into a dict:
+    sm_obj = Employee.query.filter(Employee.pos_id == '01-SM').all()
+    store_managers = {}
+    for manager in sm_obj:
+        store_managers[manager.store_id] = "{} {}".format(manager.fname, manager.lname)
+
+    return render_template('view-stores.html', stores=stores,
+                           store_managers=store_managers)
+    # html <!-- Store Manager: {{ store_managers[store.store_id] }}<br><br> -->
 
 
 @app.route('/login', methods=['POST'])
@@ -64,18 +82,71 @@ def view_profile():
 
 
 @app.route('/post')
-def post_comm():
+def post_stuff():
     """ Here, the almighty admin can post stuff. """
 
+    # This is for the list of stores in post-stuff.html
     stores = Store.query.all()
+
     # QUESTION: Is it better to make a list of stores or do in Jinja?
 
-    return render_template('post_comm.html', stores=stores)
+    return render_template('post-stuff.html', stores=stores)
 
+
+@app.route('/preview-post', methods=['POST'])
+def preview_post():
+    """ Preview what the almighty admin has posted."""
+
+    title = request.form.get('title')
+    text = request.form.get('post-content')
+    audience = request.form.get('audience')
+    if request.form.get('action'):
+        action = True
+        deadline = request.form.get('deadline')
+    else:
+        action = False
+        deadline = None
+    emp_id = session['emp_id']
+    date = datetime.now()
+
+    post = Post(title=title, date=date, text=text, audience=audience, emp_id=emp_id)
+
+    # Package all of this up in a pretty little dictionary
+    # preview = {'title': title, 'text': text, 'audience': audience,
+    #            'action': action, 'deadline': deadline}
+    db.session.add(post)
+    db.session.commit()
+
+    flash("ERMAHGERD you posted something! It will soon show up on this here homepage.")
+    return redirect('/')
+
+
+# I WAS TRYING TO DO A POST PREVIEW HERE, WILL TRY JAVASCRIPT INSTEAD
+# @app.route('/post-post', methods=['POST'])
+# def post_post():
+#     """ Posts the thing to the database """
+
+#     preview = request.form.get('preview')
+#     print preview
+
+#     # title = preview['title']
+#     # text = preview['text']
+#     # audience = preview['audience']
+#     # action = poreview['action']
+#     # deadline = preview['deadline']
+#     # pos_id = session['emp_id']
+
+#     # post = Comm(title=title, text=text, audience=audience, action=action,
+#     #             deadline=deadline, pos_id=pos_id)
+
+#     # db.session.add(post)
+#     # db.session.commit()
+
+#     flash(preview)
+#     return redirect('/')
 
 # ############################################################################
 
-# Need to find out what to add to this thing.
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
     # point that we invoke the DebugToolbarExtension

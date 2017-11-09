@@ -1,9 +1,9 @@
 """ I'm going to use this file to generate FAKE data! YAY FAKER! """
 
-# from sqlalchemy import func  # NTS: find out what this does?
+# from sqlalchemy import func
 from faker import Faker
 from model import Employee, Store, Position, District, connect_to_db, db
-from server import app  # NTS: find out what this does?
+from server import app
 from random import choice
 
 
@@ -45,7 +45,7 @@ def make_stores():
     # Since I like to run this file over and over again:
     Store.query.delete()
 
-    for store in range(1, 25):
+    for store in range(25):
         store_id = '{:0>3}'.format(store)
         name = '{} Mall'.format(fake.street_name())
         address = fake.address()
@@ -101,7 +101,7 @@ def make_emps():
     Employee.query.delete()
 
     # QUESTION: Hm, how do I solve for duplicates, though? *scratches head*
-    for emp in range(1, 200):
+    for emp in range(300):
         emp_id = "{:0>5}".format(fake.random_number(5))  # emp_id is 5 digits long
         fname = fake.first_name()
         lname = fake.last_name()
@@ -153,18 +153,18 @@ def get_random_district():
 
 
 def get_position():
-    """ Helper function. Each store needs (1) Store Manager, (2) Assistant
-    Managers. Everyone else will be a Sales Associate. This function will
+    """ Helper function. Each store needs(1) Store Manager, (2) Assistant
+    Managers. Everyone else will be a Sales associate. This function will
     create a list where these positions can be popped from."""
 
     # Generate a dictionary with store_id and a poppable list with mgmt pos.
-    avail_positions = {}
+    avail_mgmt_positions = {}
     all_stores = Store.query.all()
 
     for store in all_stores:
-        avail_positions[store.store_id] = ['01-SM', '02-AM', '02-AM']
+        avail_mgmt_positions[store.store_id] = ['01-SM', '02-AM', '02-AM']
 
-    return avail_positions
+    return avail_mgmt_positions
 
 
 def add_nancy():
@@ -180,18 +180,15 @@ def add_nancy():
                      lname='Reyes', ssn='123-45-6789',
                      password='f', store_id='999', pos_id='99-HQ')
 
-    db.session.add(corp_store)
-    db.session.add(nancy)
+    db.session.add_all([nancy, corp_store])
     db.session.commit()
 
 
 if __name__ == '__main__':
     connect_to_db(app)
 
-    # In case tables haven't been created, create them
     db.create_all()
 
-    # Import different types of data
     make_districts()
     make_stores()
     mgmt_position = get_position()
