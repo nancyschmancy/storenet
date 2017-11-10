@@ -3,7 +3,7 @@
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, session, flash, request
 from flask_debugtoolbar import DebugToolbarExtension
-from model import Employee, Store, Post, District, ReadReceipt, connect_to_db, db
+from model import Employee, Store, Post, District, ReadReceipt, Category, connect_to_db, db
 from datetime import datetime
 from sqlalchemy import desc
 from faker import Faker
@@ -24,8 +24,7 @@ app.jinja_env.undefined = StrictUndefined
 def index():
     """ This is the homepage. Will probably change. """
 
-    # NTS: Fix bug when logging out
-    if session:
+    if session.get('emp_id'):
         posts = []
         read_receipts = ReadReceipt.query.filter(ReadReceipt.emp_id == session['emp_id']).all()
         for receipt in read_receipts:
@@ -101,6 +100,7 @@ def post_stuff():
 
     # This is for the list of stores in post-stuff.html
     stores = Store.query.all()
+    categories = Category.query.all()
 
     # Fake content for fun
     fake_title = fake.catch_phrase()
@@ -108,7 +108,7 @@ def post_stuff():
 
     # QUESTION: Is it better to make a list of stores or do in Jinja?
 
-    return render_template('post-stuff.html', stores=stores,
+    return render_template('post-stuff.html', stores=stores, categories=categories,
                            fake_text=fake_text, fake_title=fake_title)
 
 
@@ -119,11 +119,13 @@ def preview_post():
     # Make post ID the datetime to ensure uniqueness
     date = datetime.now()
     title = request.form.get('title')
+    cat_id = request.form.get('category')
     text = request.form.get('post-content')
-    post_id = '{}{}{}{}{}'.format(date.year, date.month, date.day, date.hour,
-                                  date.minute)
+    post_id = '{}{}{}{}{}{}'.format(date.year, date.month, date.day, date.hour,
+                                    date.minute, date.second)
     emp_id = session['emp_id']
-    post = Post(post_id=post_id, title=title, date=date, text=text, emp_id=emp_id)
+    post = Post(post_id=post_id, title=title, cat_id=cat_id,
+                date=date, text=text, emp_id=emp_id)
     db.session.add(post)
 
     audience = request.form.getlist('audience')

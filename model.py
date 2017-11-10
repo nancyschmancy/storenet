@@ -73,19 +73,37 @@ class Employee(db.Model):
                                              self.lname)
 
 
+class Category(db.Model):
+    """ Post categories """
+
+    __tablename__ = 'categories'
+
+    cat_id = db.Column(db.String(3), primary_key=True, nullable=False)
+    name = db.Column(db.String(25), nullable=False)
+
+    def __repr__(self):
+        """ Displays info about category """
+
+        return '<Category id={} name={}'.format(self.cat_id, self.name)
+
+
 class Post(db.Model):
     """ This will hold all info about a post. """
 
     __tablename__ = 'posts'
 
-    post_id = db.Column(db.String(11), nullable=False, primary_key=True)
+    post_id = db.Column(db.String(14), nullable=False, primary_key=True)
     title = db.Column(db.String(75), nullable=False)
+    category = db.Column(db.String(3), db.ForeignKey('category.cat_id'),
+                         nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     text = db.Column(db.Text, nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
+    cat_id = db.Column(db.String(3), db.ForeignKey('categories.cat_id'), nullable=False)
 
     employee = db.relationship('Employee', backref='posts')
+    category = db.relationship('Category', backref='posts')
 
     def __repr__(self):
         """ This displays information about the communication. """
@@ -100,7 +118,7 @@ class ReadReceipt(db.Model):
 
     receipt_id = db.Column(db.Integer, primary_key=True, nullable=False,
                            autoincrement=True)
-    post_id = db.Column(db.String(11), db.ForeignKey('posts.post_id'), nullable=False)
+    post_id = db.Column(db.String(14), db.ForeignKey('posts.post_id'), nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
     was_read = db.Column(db.Boolean, nullable=False)
@@ -122,7 +140,7 @@ class Action(db.Model):
 
     action_id = db.Column(db.Integer, primary_key=True, nullable=False,
                           autoincrement=True)
-    post_id = db.Column(db.String(11), db.ForeignKey('posts.post_id'),
+    post_id = db.Column(db.String(14), db.ForeignKey('posts.post_id'),
                         primary_key=True, nullable=False)
     # assigned_by = db.Column(db.String(5), db.ForeignKey('employees.emp_id'))
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'))

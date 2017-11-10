@@ -11,6 +11,13 @@
 
 <form action='/preview-post' id='post-comm' method='post'>
     Title: <input type='text' name='title' required value="{{ fake_title }}"><br>
+    Post Category:
+    <select name='category'>
+        {% for category in categories: %}
+        <option value='{{ category.cat_id }}'>{{ category.name }}
+        </option>
+        {% endfor %}
+    </select>
     Send to:
     <input type='checkbox' id='post-all' name='audience' value='ALL'> All stores
     <input type='checkbox' id='post-d01' name='audience' value='D01'> District 1
@@ -21,7 +28,7 @@
     <br>
     Or select a store:
     {% for store in stores %}
-        <input type='checkbox' name='audience' checked='checked' value='{{ store.store_id }}'> {{ store.store_id }} {{ store.name }}
+        <input type='checkbox' name='audience' value='{{ store.store_id }}'> {{ store.store_id }} {{ store.name }}
     {% endfor %}
     <br>
     <textarea name='post-content' rows='20' cols='100' required>{{ fake_text }}</textarea><br>

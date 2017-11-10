@@ -2,7 +2,7 @@
 
 # from sqlalchemy import func
 from faker import Faker
-from model import Employee, Store, Position, District, connect_to_db, db
+from model import Employee, Store, Position, District, Category, connect_to_db, db
 from server import app
 from random import choice
 
@@ -125,50 +125,35 @@ def make_emps():
     db.session.commit()
 
 
-##############################################################################
-# Helper Functions
+def make_categories():
+    """ Let's make some categories! """
+
+    print 'Making Districts...'
+
+    # Let's delete the table in case I want to redo this
+    Category.query.delete()
+
+    category_dict = {'opr': 'Operations',
+                     'mar': 'Marketing',
+                     'mds': 'Markdowns',
+                     'vix': 'Visual Merchandising',
+                     'pro': 'Promotions',
+                     'evt': 'Events',
+                     'hrp': 'Human Resources/Payroll',
+                     'mis': 'Miscellaneous'}
+
+    for category in category_dict:
+        cat_id = category
+        name = category_dict[category]
+
+        category_obj = Category(cat_id=cat_id, name=name)
+
+        db.session.add(category_obj)
+
+    db.session.commit()
 
 
-# QUESTION: Ask about encapsulatuion. This function is outside of class.
-def get_random_store():
-    """ Helper function to generate a random store. Will be assigned to
-    employee in make_emps function. """
-
-    all_stores = Store.query.all()
-
-    random_store = choice(all_stores).store_id
-
-    return random_store
-
-
-def get_random_district():
-    """ Helper function to generate a random district. Will be assigned to
-    random store in make_store function. """
-
-    #  Need to exclude Corporate and ALL district
-    all_districts = District.query.filter( db.not_(District.district_id.in_(['D99', 'ALL']))).all()
-
-    random_district = choice(all_districts).district_id
-
-    return random_district
-
-
-def get_position():
-    """ Helper function. Each store needs(1) Store Manager, (2) Assistant
-    Managers. Everyone else will be a Sales associate. This function will
-    create a list where these positions can be popped from."""
-
-    # Generate a dictionary with store_id and a poppable list with mgmt pos.
-    avail_mgmt_positions = {}
-    all_stores = Store.query.all()
-
-    for store in all_stores:
-        avail_mgmt_positions[store.store_id] = ['01-SM', '02-AM', '02-AM']
-
-    return avail_mgmt_positions
-
-
-def add_district_managers():
+def make_district_managers():
     """ Adds district managers to the employee table. """
 
     d01 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Nidhi',
@@ -212,6 +197,49 @@ def add_nancy():
     db.session.commit()
 
 
+##############################################################################
+# Helper Functions
+
+
+# QUESTION: Ask about encapsulatuion. This function is outside of class.
+def get_random_store():
+    """ Helper function to generate a random store. Will be assigned to
+    employee in make_emps function. """
+
+    all_stores = Store.query.all()
+
+    random_store = choice(all_stores).store_id
+
+    return random_store
+
+
+def get_random_district():
+    """ Helper function to generate a random district. Will be assigned to
+    random store in make_store function. """
+
+    #  Need to exclude Corporate and ALL district
+    all_districts = District.query.filter( db.not_(District.district_id.in_(['D99', 'ALL']))).all()
+
+    random_district = choice(all_districts).district_id
+
+    return random_district
+
+
+def get_position():
+    """ Helper function. Each store needs(1) Store Manager, (2) Assistant
+    Managers. Everyone else will be a Sales associate. This function will
+    create a list where these positions can be popped from."""
+
+    # Generate a dictionary with store_id and a poppable list with mgmt pos.
+    avail_mgmt_positions = {}
+    all_stores = Store.query.all()
+
+    for store in all_stores:
+        avail_mgmt_positions[store.store_id] = ['01-SM', '02-AM', '02-AM']
+
+    return avail_mgmt_positions
+
+
 if __name__ == '__main__':
     connect_to_db(app)
 
@@ -222,5 +250,6 @@ if __name__ == '__main__':
     mgmt_position = get_position()
     make_positions()
     make_emps()
+    make_categories()
     add_nancy()
-    add_district_managers()
+    make_district_managers()
