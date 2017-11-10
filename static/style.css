@@ -1,3 +1,14 @@
+html {
+    font-family: 'europa';
+    font-weight: 300;
+    font-size; 9px;
+    letter-spacing: .05em;
+}
+
+h3 {
+    text-transform: uppercase;
+}
+
 #flash {
     color: red;
     border: 1px solid red;

@@ -21,7 +21,7 @@
     <br>
     Or select a store:
     {% for store in stores %}
-        <input type='checkbox' value='{{ store.store_id }}' checked> {{ store.store_id }} {{ store.name }}
+        <input type='checkbox' name='audience' checked='checked' value='{{ store.store_id }}'> {{ store.store_id }} {{ store.name }}
     {% endfor %}
     <br>
     <textarea name='post-content' rows='20' cols='100' required>{{ fake_text }}</textarea><br>

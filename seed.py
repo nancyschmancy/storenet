@@ -222,5 +222,5 @@ if __name__ == '__main__':
     mgmt_position = get_position()
     make_positions()
     make_emps()
-    add_district_managers()
     add_nancy()
+    add_district_managers()

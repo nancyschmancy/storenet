@@ -3,7 +3,7 @@
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, session, flash, request
 from flask_debugtoolbar import DebugToolbarExtension
-from model import Employee, Store, Post, District, connect_to_db, db
+from model import Employee, Store, Post, District, ReadReceipt, connect_to_db, db
 from datetime import datetime
 from sqlalchemy import desc
 from faker import Faker
@@ -24,15 +24,22 @@ app.jinja_env.undefined = StrictUndefined
 def index():
     """ This is the homepage. Will probably change. """
 
-    posts = Post.query.order_by(desc('date')).all()
-    return render_template('homepage.html', posts=posts)
+    # NTS: Fix bug when logging out
+    if session:
+        posts = []
+        read_receipts = ReadReceipt.query.filter(ReadReceipt.emp_id == session['emp_id']).all()
+        for receipt in read_receipts:
+            posts.append(Post.query.filter(Post.post_id == receipt.post_id).first())
+            print posts
+        return render_template('homepage.html', posts=posts)
+    else:
+        return render_template('login.html')
 
 
 @app.route('/view-post/<post_id>')
 def view_post(post_id):
     """ View a single post """
 
-    flash('you are trying to view post {}'.format(post_id))
     post = Post.query.filter(Post.post_id == post_id).one()
 
     return render_template('view-post.html', post=post)
@@ -44,11 +51,6 @@ def view_stores():
 
     stores = Store.query.order_by('district_id').all()  # get this to be in order
     districts = District.query.order_by('district_id').all()
-    # package up the list of Store Managers into a dict:
-    sm_obj = Employee.query.filter(Employee.pos_id == '01-SM').all()
-    store_managers = {}
-    for manager in sm_obj:
-        store_managers[manager.store_id] = "{} {}".format(manager.fname, manager.lname)
 
     return render_template('view-stores.html', stores=stores,
                            districts=districts)
@@ -80,6 +82,7 @@ def logout():
 
     session.clear()
     flash('You are logged out.')
+
     return redirect('/')
 
 
@@ -101,7 +104,7 @@ def post_stuff():
 
     # Fake content for fun
     fake_title = fake.catch_phrase()
-    fake_text = fake.paragraphs()
+    fake_text = fake.paragraph()
 
     # QUESTION: Is it better to make a list of stores or do in Jinja?
 
@@ -113,27 +116,39 @@ def post_stuff():
 def preview_post():
     """ Preview what the almighty admin has posted."""
 
+    # Make post ID the datetime to ensure uniqueness
+    date = datetime.now()
     title = request.form.get('title')
     text = request.form.get('post-content')
-    audience = request.form.get('audience')
+    post_id = '{}{}{}{}{}'.format(date.year, date.month, date.day, date.hour,
+                                  date.minute)
+    emp_id = session['emp_id']
+    post = Post(post_id=post_id, title=title, date=date, text=text, emp_id=emp_id)
+    db.session.add(post)
+
+    audience = request.form.getlist('audience')
+
+    # Add employees to read_receipt table:
+    for store in audience:
+        # Sales associates (03-SS) are excluded from seeing posts.
+        employees = Employee.query.filter(Employee.store_id == store,
+                                          db.not_(Employee.pos_id.in_(['03-SS']))).all()
+        for employee in employees:
+            print employee.emp_id
+            emp_read_receipt = ReadReceipt(post_id=post_id, emp_id=employee.emp_id,
+                                           was_read=False)
+            db.session.add(emp_read_receipt)
+
     # if request.form.get('action'):
     #     action = True
     #     deadline = request.form.get('deadline')
     # else:
     #     action = False
     #     deadline = None
-    emp_id = session['emp_id']
-    date = datetime.now()
 
-    post = Post(title=title, date=date, text=text, audience=audience, emp_id=emp_id)
-
-    # Package all of this up in a pretty little dictionary
-    # preview = {'title': title, 'text': text, 'audience': audience,
-    #            'action': action, 'deadline': deadline}
-    db.session.add(post)
     db.session.commit()
 
-    flash("ERMAHGERD you posted something! It will soon show up on this here homepage.")
+    flash("ERMAHGERD you posted something!")
     return redirect('/')
 
 

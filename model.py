@@ -40,7 +40,7 @@ class Store(db.Model):
 
 
 class Position(db.Model):
-    """ GLAH BLAHDFALFAF """
+    """ Position class. """
 
     __tablename__ = 'positions'
 
@@ -78,12 +78,10 @@ class Post(db.Model):
 
     __tablename__ = 'posts'
 
-    post_id = db.Column(db.Integer, nullable=False, primary_key=True,
-                        autoincrement=True)
+    post_id = db.Column(db.String(11), nullable=False, primary_key=True)
     title = db.Column(db.String(75), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     text = db.Column(db.Text, nullable=False)
-    audience = db.Column(db.Integer, db.ForeignKey('audience.id'), nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
 
@@ -95,23 +93,26 @@ class Post(db.Model):
         return '<Post {}, {}>'.format(self.post_id, self.title)
 
 
-class Audience(db.Model):
-    """ Audience will be a list of stores. """
+class ReadReceipt(db.Model):
+    """ Tracks if post was read by employee. """
 
-    __tablename__ = 'audience'
+    __tablename__ = 'read_receipt'
 
-    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
-    # group = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
+    receipt_id = db.Column(db.Integer, primary_key=True, nullable=False,
+                           autoincrement=True)
+    post_id = db.Column(db.String(11), db.ForeignKey('posts.post_id'), nullable=False)
+    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
+                       nullable=False)
+    was_read = db.Column(db.Boolean, nullable=False)
 
-    # post = db.relationship('Post', backref='audience')
+    post = db.relationship('Post', backref='read_receipt')
+    employee = db.relationship('Employee', backref='read_receipt')
 
+    def __repr__(self):
+        """ Displays info about read receipt """
 
-class Group(db.Model):
-    """ Lists store groups in audience """
-
-    __tablename__ = 'group'
-
-    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+        return "<WAS {} READ? {} {}>".format(self.post_id, self.employee.emp_id,
+                                             self.was_read)
 
 
 class Action(db.Model):
@@ -119,37 +120,21 @@ class Action(db.Model):
 
     __tablename__ = 'action'
 
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'),
+    action_id = db.Column(db.Integer, primary_key=True, nullable=False,
+                          autoincrement=True)
+    post_id = db.Column(db.String(11), db.ForeignKey('posts.post_id'),
                         primary_key=True, nullable=False)
+    # assigned_by = db.Column(db.String(5), db.ForeignKey('employees.emp_id'))
+    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'))
     complete = db.Column(db.Boolean)
-    assigner = db.Column(db.String(5))
-    assignee = db.Column(db.String(5))
 
-    post = db.relationship('Post', backref='action')
+    # assigned_by = db.relationship('Employee', backref='assigned_by')
+    employee = db.relationship('Employee', backref='action')
 
     def __repr__(self):
-        """ This displays information about action for each communcation. """
+        """ This displays information about for each communcation. """
 
         return '<Action on {}>'.format(self.post_id)
-
-
-class WasRead(db.Model):
-    """ Read receipt."""
-
-    __tablename__ = 'was_read'
-
-    post_id = db.Column(db.Integer, db.ForeignKey('posts.post_id'),
-                        primary_key=True, nullable=False)
-    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
-                       nullable=False)
-    was_read = db.Column(db.Boolean, nullable=False)
-
-    employee = db.relationship('Employee', backref='was_read')
-
-    def __repr__(self):
-        """ This displays information about action for each communcation. """
-
-        return '<Was {} read? {}}>'.format(self.post_id, self.was_read)
 
 
 ##############################################################################
