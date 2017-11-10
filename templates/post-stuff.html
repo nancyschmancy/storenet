@@ -10,32 +10,57 @@
 <h3>What do you have to say?</h3>
 
 <form action='/preview-post' id='post-comm' method='post'>
-    Title: <input type='text' name='title' required><br>
+    Title: <input type='text' name='title' required value="{{ fake_title }}"><br>
     Send to:
-    <input type='checkbox' name='audience' value='ALL'> All stores
-    <input type='checkbox' name='audience' value='D01'> District 1
-    <input type='checkbox' name='audience' value='D02'> District 2
-    <input type='checkbox' name='audience' value='D03'> District 3
-    <input type='checkbox' name='audience' value='D04'> District 4
-    <input type='checkbox' name='audience' value='D05'> District 5
-    <input type='checkbox' name='audience' value='ALL-SM'> All District Managers
+    <input type='checkbox' id='post-all' name='audience' value='ALL'> All stores
+    <input type='checkbox' id='post-d01' name='audience' value='D01'> District 1
+    <input type='checkbox' id='post-d02' name='audience' value='D02'> District 2
+    <input type='checkbox' id='post-d03' name='audience' value='D03'> District 3
+    <input type='checkbox' id='post-d04' name='audience' value='D04'> District 4
+    <input type='checkbox' id='post-d05' name='audience' value='D05'> District 5
     <br>
     Or select a store:
-    <select>
     {% for store in stores %}
-        <option name='audience' value='{{ store.store_id }}'>
-            {{ store.store_id }} {{ store.name }}
-        </option>
+        <input type='checkbox' value='{{ store.store_id }}' checked> {{ store.store_id }} {{ store.name }}
     {% endfor %}
-    </select>
     <br>
-    <textarea name='post-content' rows='20' cols='100' required></textarea><br>
+    <textarea name='post-content' rows='20' cols='100' required>{{ fake_text }}</textarea><br>
+
     Action required? <input type='checkbox' name='action' value='chuck_norris'>
     <div id='flash'>Going to put this in a javascript thing that shows up when you click yes</div>
     Action item: <input type='text/css' name='action_item'><br>
     Deadline: <input type='date' name='deadline'>
     <input type='submit'>
-</form
+</form>
+
+<script type="text/javascript">
+// pseudocode
+// if you click on an all or district checkbox, the stores belonging to that district
+// will autotmatically be checked.
+
+// 1. get a dictionary or json thing that has all, and districts and stores with them
+// 2. get json to this page
+// 3. use javascript to dynamically check box using some .attr function.
+
+</script>
+
+<form>
+<input type='checkbox' id='ugh' value='ugh'> UGH
+<input type='checkbox' id='fargh' value='fargh'> FARGH
+</form>
+
+<script type="text/javascript">
+
+$('#ugh').on('click', function () {
+    $('#fargh').attr('checked', 'checked')
+});
+
+$('#ugh').on('click', function () {
+    $('#fargh').attr('checked', Null)
+});
+
+</script>
+
 
 
 

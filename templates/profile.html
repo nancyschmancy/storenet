@@ -7,12 +7,11 @@
 <h3>Details for {{ obj.fname }} {{ obj.lname}}</h3>
 
 <ul>
-    <li>{{ obj.emp_id }}</li>
-    <li>{{ obj.pos_id }}</li>
     <li>{{ obj.fname }} {{ obj.lname }}</li>
-    <li>{{ obj.ssn }}</li>
-    <li>Store {{ obj.store.store_id }}</li>
-    <li>{{ obj.store.name }}</li>
+    <li><b>Employee ID:</b> {{ obj.emp_id }}</li>
+    <li><b>Position:</b>{{ obj.pos_id }} - {{ obj.position.title }}</li>
+    <li><b>SSN:</b> {{ obj.ssn }}</li>
+    <li>Store {{ obj.store.store_id }} {{ obj.store.name }}</li>
     <li>District {{ obj.store.district.name }}</li>
     <li>{{ obj }}</li>
 </ul>

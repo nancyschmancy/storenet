@@ -45,7 +45,7 @@ def make_stores():
     # Since I like to run this file over and over again:
     Store.query.delete()
 
-    for store in range(25):
+    for store in range(1, 25):
         store_id = '{:0>3}'.format(store)
         name = '{} Mall'.format(fake.street_name())
         address = fake.address()
@@ -67,7 +67,7 @@ def make_stores():
     db.session.commit()
 
 
-def make_positions():
+def make_positions():  # LOL that's what she said
     """ Positions """
 
     print 'Making Positions...'
@@ -145,7 +145,8 @@ def get_random_district():
     """ Helper function to generate a random district. Will be assigned to
     random store in make_store function. """
 
-    all_districts = District.query.all()
+    #  Need to exclude Corporate and ALL district
+    all_districts = District.query.filter( db.not_(District.district_id.in_(['D99', 'ALL']))).all()
 
     random_district = choice(all_districts).district_id
 
@@ -165,6 +166,33 @@ def get_position():
         avail_mgmt_positions[store.store_id] = ['01-SM', '02-AM', '02-AM']
 
     return avail_mgmt_positions
+
+
+def add_district_managers():
+    """ Adds district managers to the employee table. """
+
+    d01 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Nidhi',
+                   lname='Sharma', ssn=fake.ssn(),
+                   password='f', store_id='999', pos_id='10-DM')
+
+    d02 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Erin',
+                   lname='Cusick', ssn=fake.ssn(),
+                   password='f', store_id='999', pos_id='10-DM')
+
+    d03 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Anjou',
+                   lname='Ahlborn-Kay', ssn=fake.ssn(),
+                   password='f', store_id='999', pos_id='10-DM')
+
+    d04 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Courtney',
+                   lname='Cohan', ssn=fake.ssn(),
+                   password='f', store_id='999', pos_id='10-DM')
+
+    d05 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='John',
+                   lname='Krasinski', ssn=fake.ssn(),
+                   password='f', store_id='999', pos_id='10-DM')
+
+    db.session.add_all([d01, d02, d03, d04, d05])
+    db.session.commit()
 
 
 def add_nancy():
@@ -194,4 +222,5 @@ if __name__ == '__main__':
     mgmt_position = get_position()
     make_positions()
     make_emps()
+    add_district_managers()
     add_nancy()

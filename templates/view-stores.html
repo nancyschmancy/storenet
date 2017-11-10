@@ -4,15 +4,18 @@
 
 {% block body %}
 
-<h3>Store Directory</h3>
+<h2>Store Directory</h2>
+
+{% for district in districts %}
 <ul>
-{% for store in stores %}
-<li>{{ store.store_id}} {{ store.name}}<br>
-    {{ store.address }}<br>
-    {{ store.phone }}<br>
-    belongs to {{ store.district.name }} District<br>
-{% endfor %}
+<h3>{{ district.name }}</h3>
+    {% for store in district.stores %}
+    <li><b>{{ store.store_id}} {{ store.name}}</b><br>
+        {{ store.address }}<br>
+        {{ store.phone }}<br><br>
+    {% endfor %}
 </ul>
+{% endfor %}
 
 <p>Chuck Norris can never fill out an online form, because Chuck Norris 
     will never submit.</p>

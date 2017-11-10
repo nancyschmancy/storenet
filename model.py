@@ -74,7 +74,7 @@ class Employee(db.Model):
 
 
 class Post(db.Model):
-    """ Making communication model thingy """
+    """ This will hold all info about a post. """
 
     __tablename__ = 'posts'
 
@@ -83,7 +83,7 @@ class Post(db.Model):
     title = db.Column(db.String(75), nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     text = db.Column(db.Text, nullable=False)
-    audience = db.Column(db.String(3))
+    audience = db.Column(db.Integer, db.ForeignKey('audience.id'), nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
 
@@ -93,6 +93,25 @@ class Post(db.Model):
         """ This displays information about the communication. """
 
         return '<Post {}, {}>'.format(self.post_id, self.title)
+
+
+class Audience(db.Model):
+    """ Audience will be a list of stores. """
+
+    __tablename__ = 'audience'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
+    # group = db.Column(db.Integer, db.ForeignKey('group.id'), nullable=False)
+
+    # post = db.relationship('Post', backref='audience')
+
+
+class Group(db.Model):
+    """ Lists store groups in audience """
+
+    __tablename__ = 'group'
+
+    id = db.Column(db.Integer, primary_key=True, nullable=False, autoincrement=True)
 
 
 class Action(db.Model):
@@ -131,6 +150,7 @@ class WasRead(db.Model):
         """ This displays information about action for each communcation. """
 
         return '<Was {} read? {}}>'.format(self.post_id, self.was_read)
+
 
 ##############################################################################
 # Helper functions - NTS: find out what these do

@@ -7,7 +7,7 @@
 <h3>New posts from the almighty masters</h3>
 
 {% for post in posts %}
-<li><a href='#'>{{ post.title }} posted on {{ post.date }} by the almighty {{ post.employee.fname }}</a>
+<li><a href='/view-post/{{ post.post_id }}'><b>{{ post.title }}</b> posted on {{ post.date }} by {{ post.employee.fname }}</a>
 {% endfor %}
 
 <p>Chuck Norris can never fill out an online form, because Chuck Norris 

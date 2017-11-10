@@ -9,7 +9,14 @@
 
 <body>
     <h1><a href='/'>Storenet</a></h1>
-
+    
+    <div id='search'>
+        <form action='/search-posts' id='search-posts' method='post'>
+            Search: <input type='text' name='search'>
+            <input type='submit'>
+        </form> 
+    </div>
+     
     <div id='navbar'>
         {% if session.get('emp_id') %}  <!-- REMEMBER THIS! -->
             You are logged in as {{ session['name']}}. 
