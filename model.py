@@ -94,8 +94,6 @@ class Post(db.Model):
 
     post_id = db.Column(db.String(14), nullable=False, primary_key=True)
     title = db.Column(db.String(75), nullable=False)
-    category = db.Column(db.String(3), db.ForeignKey('category.cat_id'),
-                         nullable=False)
     date = db.Column(db.DateTime, nullable=False)
     text = db.Column(db.Text, nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
@@ -122,6 +120,7 @@ class ReadReceipt(db.Model):
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
     was_read = db.Column(db.Boolean, nullable=False)
+    read_date = db.Column(db.DateTime, nullable=True)
 
     post = db.relationship('Post', backref='read_receipt')
     employee = db.relationship('Employee', backref='read_receipt')
@@ -142,11 +141,14 @@ class Action(db.Model):
                           autoincrement=True)
     post_id = db.Column(db.String(14), db.ForeignKey('posts.post_id'),
                         primary_key=True, nullable=False)
-    # assigned_by = db.Column(db.String(5), db.ForeignKey('employees.emp_id'))
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'))
-    complete = db.Column(db.Boolean)
+    action_item = db.Column(db.String(100), nullable=False)
+    assigned_date = db.Column(db.DateTime, nullable=True)
+    deadline = db.Column(db.DateTime, nullable=False)
+    complete = db.Column(db.Boolean, nullable=False)
+    complete_date = db.Column(db.DateTime, nullable=True)
 
-    # assigned_by = db.relationship('Employee', backref='assigned_by')
+    post = db.relationship('Post', backref='action')
     employee = db.relationship('Employee', backref='action')
 
     def __repr__(self):

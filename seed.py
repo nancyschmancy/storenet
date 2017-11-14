@@ -23,8 +23,7 @@ def make_districts():
                      'D03': 'Midwest',
                      'D04': 'Northeast',
                      'D05': 'Southeast',
-                     'D99': 'Corporate HQ',
-                     'ALL': 'All Stores'}  # QUESTION: How to do this?
+                     'D99': 'Corporate HQ'}  # QUESTION: How to do this?
 
     for district in district_dict:
         district_id = district
@@ -102,11 +101,11 @@ def make_emps():
 
     # QUESTION: Hm, how do I solve for duplicates, though? *scratches head*
     for emp in range(300):
-        emp_id = "{:0>5}".format(fake.random_number(5))  # emp_id is 5 digits long
+        emp_id = "{:0>5}".format(emp)  # emp_id is 5 digits long
         fname = fake.first_name()
         lname = fake.last_name()
         ssn = fake.ssn()
-        password = '{}{}'.format((ssn[-4:]), (lname[0]))
+        password = 'a'  # '{}{}'.format((ssn[-4:]), (lname[0]))
         store_id = get_random_store()
         if mgmt_position[store_id] == []:
             pos_id = '03-SS'
@@ -128,7 +127,7 @@ def make_emps():
 def make_categories():
     """ Let's make some categories! """
 
-    print 'Making Districts...'
+    print 'Making Categories...'
 
     # Let's delete the table in case I want to redo this
     Category.query.delete()
@@ -172,8 +171,8 @@ def make_district_managers():
                    lname='Cohan', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
-    d05 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='John',
-                   lname='Krasinski', ssn=fake.ssn(),
+    d05 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Ariana',
+                   lname='Patterson', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
     db.session.add_all([d01, d02, d03, d04, d05])
@@ -217,8 +216,8 @@ def get_random_district():
     """ Helper function to generate a random district. Will be assigned to
     random store in make_store function. """
 
-    #  Need to exclude Corporate and ALL district
-    all_districts = District.query.filter( db.not_(District.district_id.in_(['D99', 'ALL']))).all()
+    #  Need to exclude Corporate
+    all_districts = District.query.filter( db.not_(District.district_id.in_(['D99']))).all()
 
     random_district = choice(all_districts).district_id
 

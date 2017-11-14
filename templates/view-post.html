@@ -5,15 +5,27 @@
 {% block body %}
 
 <p>
-    {{ post.title}}<br>
+    {{ post.title }}<br>
     
     Authored by {{ post.employee.fname }}<br>
     In category {{ post.category.name }}<br>
     Posted on {{ post.date }}<br><br>
+{% if post.action %}
+    Task: {{ post.action[0].action_item }} <!-- QUESTION: WHY IS THIS A LIST??? -->
+<br>This task is due on <b>{{ post.action[0].deadline }}</b>. Assign this task to an associate:
+    <form action='/assign-action' method='post'>
+        {% for employee in employee.store.employees %}
+        <input type='radio' name='assignee' value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}<br>
+        {% endfor %}
+        <input type='hidden' name='post_id' value='{{ post.post_id }}'>
+        <input type='submit'>
+    </form>
+{% else %}
+No action is required on this
+{% endif %}
+  <br><br>  
     {{ post.text }}<br>
 </p>
 
-<form action='/assign-action' method='post'>
-    <input type='checkbox' name='assign-action'>
 
 {% endblock %}

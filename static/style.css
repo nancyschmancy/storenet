@@ -5,11 +5,12 @@ html {
     letter-spacing: .05em;
 }
 
-h3 {
-    text-transform: uppercase;
-}
-
 #flash {
     color: red;
     border: 1px solid red;
+}
+
+#unread {
+    color: red;
+    font: 10px bold;
 }

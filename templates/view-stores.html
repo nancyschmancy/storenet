@@ -6,13 +6,15 @@
 
 <h2>Store Directory</h2>
 
-{% for district in districts %}
+{% for district in districts[:-1] %} <!--Prevents Corp District from display-->
 <ul>
 <h3>{{ district.name }}</h3>
     {% for store in district.stores %}
     <li><b>{{ store.store_id}} {{ store.name}}</b><br>
         {{ store.address }}<br>
-        {{ store.phone }}<br><br>
+        {{ store.phone }}<br>
+        Store Manageer: {{ sm_dict[store.store_id] }}<br><br>
+
     {% endfor %}
 </ul>
 {% endfor %}

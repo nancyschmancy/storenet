@@ -6,8 +6,15 @@
 
 <h3>New posts from the almighty masters</h3>
 
-{% for post in posts %}
-<li><a href='/view-post/{{ post.post_id }}'><b>{{ post.title }}</b> posted on {{ post.date }} by {{ post.employee.fname }}</a>
+{% for receipt in read_receipts %}
+    {% if receipt.was_read == False %}
+        <span id='unread'>NEW!</span>
+    {% endif %}
+    <a href='/view-post/{{ receipt.post_id }}'>{{ receipt.post.title }}</a>
+    {{ receipt.post.date }}
+    {{ receipt.post.employee.fname }}
+    
+    <br>
 {% endfor %}
 
 <p>Chuck Norris can never fill out an online form, because Chuck Norris 

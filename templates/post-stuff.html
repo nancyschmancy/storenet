@@ -18,8 +18,9 @@
         </option>
         {% endfor %}
     </select>
+    <button id='post-all'>Uncheck All Stores</button>
     Send to:
-    <input type='checkbox' id='post-all' name='audience' value='ALL'> All stores
+    <input type='checkbox' name='audience' value='ALL' checked=false> All stores
     <input type='checkbox' id='post-d01' name='audience' value='D01'> District 1
     <input type='checkbox' id='post-d02' name='audience' value='D02'> District 2
     <input type='checkbox' id='post-d03' name='audience' value='D03'> District 3
@@ -28,49 +29,32 @@
     <br>
     Or select a store:
     {% for store in stores %}
-        <input type='checkbox' name='audience' value='{{ store.store_id }}'> {{ store.store_id }} {{ store.name }}
+        <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}' checked='checked'>{{ store.store_id }} {{ store.name }}
     {% endfor %}
     <br>
-    <textarea name='post-content' rows='20' cols='100' required>{{ fake_text }}</textarea><br>
-
-    Action required? <input type='checkbox' name='action' value='chuck_norris'>
-    <div id='flash'>Going to put this in a javascript thing that shows up when you click yes</div>
-    Action item: <input type='text/css' name='action_item'><br>
-    Deadline: <input type='date' name='deadline'>
+    <div id='flash'>use javascript to make action & deadline rquired</div>
+    Action required? <input type='checkbox' name='has_action' checked>
+    Action item: <input type='text/css' name='action_item' value="BLAH">
+    Deadline: <input type='date' name='deadline'><br>
+    <textarea name='post-content' rows='10' cols='50' required>{{ fake_text }}</textarea><br>
     <input type='submit'>
+
 </form>
 
 <script type="text/javascript">
-// pseudocode
-// if you click on an all or district checkbox, the stores belonging to that district
-// will autotmatically be checked.
+    "use strict";
 
-// 1. get a dictionary or json thing that has all, and districts and stores with them
-// 2. get json to this page
-// 3. use javascript to dynamically check box using some .attr function.
-
-</script>
-
-<form>
-<input type='checkbox' id='ugh' value='ugh'> UGH
-<input type='checkbox' id='fargh' value='fargh'> FARGH
-</form>
-
-<script type="text/javascript">
-
-$('#ugh').on('click', function () {
-    $('#fargh').attr('checked', 'checked')
-});
-
-$('#ugh').on('click', function () {
-    $('#fargh').attr('checked', Null)
+$('#post-all').on('click', function (evt) {
+    evt.preventDefault();
+    if ($('#post-all').html() === 'Uncheck All Stores') {
+        $('.store').removeAttr('checked');
+        $('#post-all').html('Select All Stores');
+    } else if ($('#post-all').html() === 'Select All Stores') {
+        $('.store').attr('checked', 'checked');
+        $('#post-all').html('Uncheck All Stores');
+    }
 });
 
 </script>
-
-
-
-
-
 
 {% endblock %}

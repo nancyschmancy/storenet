@@ -3,10 +3,11 @@
 from jinja2 import StrictUndefined
 from flask import Flask, render_template, redirect, session, flash, request
 from flask_debugtoolbar import DebugToolbarExtension
-from model import Employee, Store, Post, District, ReadReceipt, Category, connect_to_db, db
+from model import Employee, Store, Post, District, ReadReceipt, Category, Action, connect_to_db, db
 from datetime import datetime
 from sqlalchemy import desc
 from faker import Faker
+from markov import trump_title
 
 fake = Faker()
 
@@ -22,38 +23,51 @@ app.jinja_env.undefined = StrictUndefined
 
 @app.route('/')
 def index():
-    """ This is the homepage. Will probably change. """
+    """ Homepage will display posts and tasks. """
 
     if session.get('emp_id'):
-        posts = []
         read_receipts = ReadReceipt.query.filter(ReadReceipt.emp_id == session['emp_id']).all()
-        for receipt in read_receipts:
-            posts.append(Post.query.filter(Post.post_id == receipt.post_id).first())
-            print posts
-        return render_template('homepage.html', posts=posts)
+        return render_template('homepage.html', read_receipts=read_receipts)
     else:
         return render_template('login.html')
 
 
 @app.route('/view-post/<post_id>')
 def view_post(post_id):
-    """ View a single post """
+    """ View a single post. """
 
     post = Post.query.filter(Post.post_id == post_id).one()
 
-    return render_template('view-post.html', post=post)
+    # Read receipt:
+    emp_id = session['emp_id']
+    read_receipt = ReadReceipt.query.filter(ReadReceipt.post_id == post_id,
+                                            ReadReceipt.emp_id == emp_id).one()
+    read_receipt.was_read = True
+    if read_receipt.read_date is None:  # Prevents read date from overwriting itself
+        read_receipt.read_date = datetime.now()
+
+    # List of employees to assign action (using user's store via session)
+    employee = Employee.query.filter(Employee.emp_id == session['emp_id']).one()
+    db.session.commit()
+
+    return render_template('view-post.html', post=post, employee=employee)
 
 
 @app.route('/view-stores')
 def view_stores():
     """ Displays a directory of all stores. """
 
-    stores = Store.query.order_by('district_id').all()  # get this to be in order
+    stores = Store.query.order_by('district_id').all()  # TODO: get this to be in order
     districts = District.query.order_by('district_id').all()
 
+    # Create a store manager dictionary for store directory:
+    sm_dict = {}
+    store_managers = Employee.query.filter(Employee.pos_id == '01-SM').all()
+    for manager in store_managers:
+        sm_dict[manager.store_id] = "{} {}".format(manager.fname, manager.lname)
+
     return render_template('view-stores.html', stores=stores,
-                           districts=districts)
-    # html <!-- Store Manager: {{ store_managers[store.store_id] }}<br><br> -->
+                           districts=districts, sm_dict=sm_dict)
 
 
 @app.route('/login', methods=['POST'])
@@ -103,8 +117,8 @@ def post_stuff():
     categories = Category.query.all()
 
     # Fake content for fun
-    fake_title = fake.catch_phrase()
-    fake_text = fake.paragraph()
+    fake_title = trump_title()
+    fake_text = trump_title()
 
     # QUESTION: Is it better to make a list of stores or do in Jinja?
 
@@ -116,37 +130,39 @@ def post_stuff():
 def preview_post():
     """ Preview what the almighty admin has posted."""
 
-    # Make post ID the datetime to ensure uniqueness
-    date = datetime.now()
     title = request.form.get('title')
     cat_id = request.form.get('category')
     text = request.form.get('post-content')
-    post_id = '{}{}{}{}{}{}'.format(date.year, date.month, date.day, date.hour,
-                                    date.minute, date.second)
+    date = datetime.now()  # Make post ID the datetime to ensure uniqueness
+    post_id = '{:0>4}{:0>2}{:0>2}{:0>2}{:0>2}{:0>2}'.format(date.year, date.month,
+                                                            date.day, date.hour,
+                                                            date.minute, date.second)
     emp_id = session['emp_id']
     post = Post(post_id=post_id, title=title, cat_id=cat_id,
                 date=date, text=text, emp_id=emp_id)
     db.session.add(post)
 
+    # Action section:
+    if request.form.get('has_action'):
+        action_item = request.form.get('action_item')
+        deadline = request.form.get('deadline')
+        action = Action(post_id=post_id, action_item=action_item, assigned_date=date,
+                        deadline=deadline, complete=False)
+
+        db.session.add(action)
+
+    # Determine who sees this post
     audience = request.form.getlist('audience')
 
-    # Add employees to read_receipt table:
+    # Add each employee from audience to read_receipt table:
     for store in audience:
         # Sales associates (03-SS) are excluded from seeing posts.
         employees = Employee.query.filter(Employee.store_id == store,
                                           db.not_(Employee.pos_id.in_(['03-SS']))).all()
         for employee in employees:
-            print employee.emp_id
             emp_read_receipt = ReadReceipt(post_id=post_id, emp_id=employee.emp_id,
                                            was_read=False)
             db.session.add(emp_read_receipt)
-
-    # if request.form.get('action'):
-    #     action = True
-    #     deadline = request.form.get('deadline')
-    # else:
-    #     action = False
-    #     deadline = None
 
     db.session.commit()
 
@@ -154,31 +170,23 @@ def preview_post():
     return redirect('/')
 
 
-# I WAS TRYING TO DO A POST PREVIEW HERE, WILL TRY JAVASCRIPT INSTEAD
-# @app.route('/post-post', methods=['POST'])
-# def post_post():
-#     """ Posts the thing to the database """
+@app.route('/assign-action', methods=['POST'])
+def assign_action():
+    """ Assigns action to employee. Default assignee is person who read it first."""
 
-#     preview = request.form.get('preview')
-#     print preview
+    assignee = request.form.get('assignee')
+    post_id = request.form.get('post_id')
+    action = Action.query.filter(Action.post_id == post_id).one()
 
-#     # title = preview['title']
-#     # text = preview['text']
-#     # audience = preview['audience']
-#     # action = poreview['action']
-#     # deadline = preview['deadline']
-#     # pos_id = session['emp_id']
+    action.emp_id = assignee
 
-#     # post = Comm(title=title, text=text, audience=audience, action=action,
-#     #             deadline=deadline, pos_id=pos_id)
+    db.session.commit()
 
-#     # db.session.add(post)
-#     # db.session.commit()
+    return redirect('/')
 
-#     flash(preview)
-#     return redirect('/')
 
 # ############################################################################
+
 
 if __name__ == "__main__":
     # We have to set debug=True here, since it has to be True at the
