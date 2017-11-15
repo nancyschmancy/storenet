@@ -148,7 +148,7 @@ class Action(db.Model):
     complete = db.Column(db.Boolean, nullable=False)
     complete_date = db.Column(db.DateTime, nullable=True)
 
-    post = db.relationship('Post', backref='action')
+    post = db.relationship('Post', backref='action', uselist=False)
     employee = db.relationship('Employee', backref='action')
 
     def __repr__(self):

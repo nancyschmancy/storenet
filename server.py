@@ -27,7 +27,13 @@ def index():
 
     if session.get('emp_id'):
         read_receipts = ReadReceipt.query.filter(ReadReceipt.emp_id == session['emp_id']).all()
-        return render_template('homepage.html', read_receipts=read_receipts)
+        incomplete_actions = Action.query.filter(Action.emp_id == session['emp_id'],
+                                                 Action.complete == False).all()
+        complete_actions = Action.query.filter(Action.emp_id == session['emp_id'],
+                                               Action.complete == True).all()
+        return render_template('homepage.html', read_receipts=read_receipts,
+                               incomplete_actions=incomplete_actions,
+                               complete_actions=complete_actions)
     else:
         return render_template('login.html')
 
@@ -74,10 +80,14 @@ def view_stores():
 def login():
     """ Processes login. """
 
+    # Grab emp_id & password from site
     form_emp_id = request.form.get('form_emp_id')
     form_pw = request.form.get('form_pw')
+
+    # Grab employee object from database
     employee = Employee.query.filter(Employee.emp_id == form_emp_id).first()
 
+    # Process login
     if employee and form_pw == employee.password:
         session['emp_id'] = employee.emp_id
         session['name'] = "{} {}".format(employee.fname, employee.lname)
@@ -116,11 +126,9 @@ def post_stuff():
     stores = Store.query.all()
     categories = Category.query.all()
 
-    # Fake content for fun
+    # Fake content for fun & giggles
     fake_title = trump_title()
     fake_text = trump_title()
-
-    # QUESTION: Is it better to make a list of stores or do in Jinja?
 
     return render_template('post-stuff.html', stores=stores, categories=categories,
                            fake_text=fake_text, fake_title=fake_title)
@@ -151,7 +159,7 @@ def preview_post():
 
         db.session.add(action)
 
-    # Determine who sees this post
+    # Determine who sees this post:
     audience = request.form.getlist('audience')
 
     # Add each employee from audience to read_receipt table:
@@ -182,6 +190,27 @@ def assign_action():
 
     db.session.commit()
 
+    return redirect('/')
+
+
+@app.route('/complete-action', methods=['POST'])
+def complete_action():
+    """ Marks action as complete on homepage. """
+
+    # Grab actions completed from homepage & turn into list of integers
+    actions_from_form = request.form.getlist('completed-actions')
+    actions_completed = map(int, actions_from_form)
+
+    # Grab all actions associated with form submission
+    all_actions = Action.query.filter(Action.action_id.in_(actions_completed)).all()
+
+    # Update to completed
+    for action in all_actions:
+        action.complete = True
+
+    db.session.commit()
+
+    flash("Your tasks have been marked as complete")
     return redirect('/')
 
 

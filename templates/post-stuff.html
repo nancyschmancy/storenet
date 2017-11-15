@@ -20,7 +20,6 @@
     </select>
     <button id='post-all'>Uncheck All Stores</button>
     Send to:
-    <input type='checkbox' name='audience' value='ALL' checked=false> All stores
     <input type='checkbox' id='post-d01' name='audience' value='D01'> District 1
     <input type='checkbox' id='post-d02' name='audience' value='D02'> District 2
     <input type='checkbox' id='post-d03' name='audience' value='D03'> District 3
@@ -32,7 +31,7 @@
         <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}' checked='checked'>{{ store.store_id }} {{ store.name }}
     {% endfor %}
     <br>
-    <div id='flash'>use javascript to make action & deadline rquired</div>
+    <div id='flash'>use javascript to make action/ deadline rquired</div>
     Action required? <input type='checkbox' name='has_action' checked>
     Action item: <input type='text/css' name='action_item' value="BLAH">
     Deadline: <input type='date' name='deadline'><br>

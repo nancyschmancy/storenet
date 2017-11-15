@@ -4,7 +4,7 @@
 
 {% block body %}
 
-<h3>New posts from the almighty masters</h3>
+<h3>New posts</h3>
 
 {% for receipt in read_receipts %}
     {% if receipt.was_read == False %}
@@ -13,11 +13,26 @@
     <a href='/view-post/{{ receipt.post_id }}'>{{ receipt.post.title }}</a>
     {{ receipt.post.date }}
     {{ receipt.post.employee.fname }}
-    
     <br>
 {% endfor %}
 
-<p>Chuck Norris can never fill out an online form, because Chuck Norris 
-    will never submit.</p>
+{% if incomplete_actions %}
+    <h3>Tasks</h3>
+    <form action='/complete-action' method='post'>
+        {% for action in incomplete_actions %}
+            <input type='checkbox' name='completed-actions' value='{{action.action_id}}'>
+            <a href='view-post/{{ action.post_id }}'>{{ action.action_item }}</a> 
+            due on {{ action.deadline }}<br>
+        {% endfor %}
+        <input type='submit' value='Mark as completed'>
+    </form>
+{% endif %}
+
+{% if complete_actions %}
+<h3>Completed Tasks</h3>
+{% for action in complete_actions %}
+        {{ action.action_item }} completed on ___<br>
+    {% endfor %}
+{% endif %}
 
 {% endblock %}

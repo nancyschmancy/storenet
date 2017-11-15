@@ -75,30 +75,26 @@ def make_text(chains):
     punctuation = ['.']
     punct = set(string.punctuation)
 
-    # While true, if random_bigram's tuple starts with a capital letter, break
-    # else choose a new random bigrram.
-
+    # If random_bigram's tuple starts with a capital letter or punctuation, break
+    # else choose a new random bigram.
     random_bigram = choice(chains.keys())  # This is a tuple
     bigram_len = len(random_bigram)
 
-
-    while True:  # Checks for capitalization and punctuation.
-                 # otherwise, chooses a new ngram.
+    while True:
         if (random_bigram[0][0] == random_bigram[0][0].upper() and
-            random_bigram[0][0] not in punct):
+           random_bigram[0][0] not in punct):
             break
         else:
             random_bigram = choice(chains.keys())
-
 
     # words.append(random_bigram)
     words = list(random_bigram)  # turns the random bigram into a list as starting pt.
     new_key = random_bigram  # reassigns the random ngram tuple to a new var
 
     while True:  # ends the program if it comes across the end of the paragraph or a word
-                 # with a punctuation mark
+                 # with a punctuation mark.
         if chains[new_key] is None:
-            brxeak
+            break
 
         random_word = choice(chains[new_key])
         words.append(random_word)
@@ -106,7 +102,7 @@ def make_text(chains):
         if random_word[-1] in punctuation:
             break
 
-        bigram_list = list(new_key[1:bigram_len+1])
+        bigram_list = list(new_key[1:bigram_len + 1])
         bigram_list.append(random_word)
         new_key = tuple(bigram_list)
 
@@ -120,7 +116,6 @@ def make_text(chains):
 
 def trump_title():
     chains = make_chains(text_string, 3)
-# # Produce random text
     random_text = make_text(chains)
 
     return random_text
