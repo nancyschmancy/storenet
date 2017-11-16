@@ -4,27 +4,27 @@
 
 {% block body %}
 
-<h4>{{ post.title }}</h4>
+<h4>{{ post.title }} {{ post.post_id }}</h4>
 Authored by {{ post.employee.fname }} | 
 In category {{ post.category.name }} | 
 Posted on {{ post.date }}<br><br>
 
-{% if post.action %}
-    Task: {{ post.action[0].action_item }} <!-- QUESTION: WHY IS THIS A LIST??? -->
-    <br>This task is due on <b>{{ post.action[0].deadline }}</b>. Status: 
-    {% if post.action[0].complete == False %}
+
+{% if post.tasks %}
+    This task is due on <b>{{ task.deadline }}</b>. Status: 
+    {% if task.complete == False %}
         INCOMPLETE.
     {% else %}
-        Completed on ___
+        Completed on {{ task.complete_date }}
     {% endif %}
     <br>
 
-    {% if post.action[0].emp_id %} <!-- QUESTION: Again, why is this a list? -->
-        This task is already assigned to {{ post.action[0].employee.fname }}.
+    {% if task.emp_id %} <!-- QUESTION: Again, why is this a list? -->
+        This task is already assigned to {{ task.employee.fname }}.
     {% else %}
         Assign this task to an associate:
-        <form action='/assign-action' method='post'>
-            {% for employee in employee.store.employees %}
+        <form action='/assign-task' method='post'>
+            {% for employee in task.store.employees %}
             <input type='radio' name='assignee' value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}<br>
             {% endfor %}
             <input type='hidden' name='post_id' value='{{ post.post_id }}'>
@@ -33,7 +33,7 @@ Posted on {{ post.date }}<br><br>
     {% endif %}
 
 {% else %}
-    No action is required on this. Go get a coffee.
+    No task is required on this. Go get a coffee.
 {% endif %}
 
 <p>{{ post.text }}</p>

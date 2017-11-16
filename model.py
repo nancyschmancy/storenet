@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 # This is the connection to the PostgreSQL database; we're getting this through
 # the Flask-SQLAlchemy helper library. On this, we can find the `session`
-# object, where we do most of our interactions (like committing, etc.)
+# object, where we do most of our intertasks (like committing, etc.)
 
 db = SQLAlchemy()
 
@@ -132,29 +132,33 @@ class ReadReceipt(db.Model):
                                              self.was_read)
 
 
-class Action(db.Model):
-    """ Tracks action item. """
+class Task(db.Model):
+    """ Tracks task item. """
 
-    __tablename__ = 'action'
+    __tablename__ = 'task'
 
-    action_id = db.Column(db.Integer, primary_key=True, nullable=False,
+    task_id = db.Column(db.Integer, primary_key=True, nullable=False,
                           autoincrement=True)
     post_id = db.Column(db.String(14), db.ForeignKey('posts.post_id'),
                         primary_key=True, nullable=False)
-    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'))
-    action_item = db.Column(db.String(100), nullable=False)
+    store_id = db.Column(db.String(3), db.ForeignKey('stores.store_id'),
+                         nullable=False)
+    emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
+                       nullable=True)
+    task_item = db.Column(db.String(100), nullable=False)
     assigned_date = db.Column(db.DateTime, nullable=True)
-    deadline = db.Column(db.DateTime, nullable=False)
+    deadline = db.Column(db.DateTime, nullable=True)
     complete = db.Column(db.Boolean, nullable=False)
     complete_date = db.Column(db.DateTime, nullable=True)
 
-    post = db.relationship('Post', backref='action', uselist=False)
-    employee = db.relationship('Employee', backref='action')
+    post = db.relationship('Post', backref='tasks')
+    employee = db.relationship('Employee', backref='tasks')
+    store = db.relationship('Store', backref='tasks')
 
     def __repr__(self):
-        """ This displays information about for each communcation. """
+        """ This displays information about for each task. """
 
-        return '<Action on {}>'.format(self.post_id)
+        return '<Task on {}>'.format(self.post_id)
 
 
 ##############################################################################

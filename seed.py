@@ -155,23 +155,23 @@ def make_categories():
 def make_district_managers():
     """ Adds district managers to the employee table. """
 
-    d01 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Nidhi',
+    d01 = Employee(emp_id='11111', fname='Nidhi',
                    lname='Sharma', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
-    d02 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Erin',
+    d02 = Employee(emp_id='22222', fname='Erin',
                    lname='Cusick', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
-    d03 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Anjou',
+    d03 = Employee(emp_id='33333', fname='Anjou',
                    lname='Ahlborn-Kay', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
-    d04 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Courtney',
+    d04 = Employee(emp_id='44444', fname='Courtney',
                    lname='Cohan', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
-    d05 = Employee(emp_id='{:0>5}'.format(fake.random_number(5)), fname='Ariana',
+    d05 = Employee(emp_id='55555', fname='Ariana',
                    lname='Patterson', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 

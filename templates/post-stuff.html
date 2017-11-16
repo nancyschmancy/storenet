@@ -9,8 +9,8 @@
 
 <h3>What do you have to say?</h3>
 
-<form action='/preview-post' id='post-comm' method='post'>
-    Title: <input type='text' name='title' required value="{{ fake_title }}"><br>
+<form action='/preview-post' method='post'>
+    Title: <input type='text' name='title' required value='{{ fake_title }}'><br>
     Post Category:
     <select name='category'>
         {% for category in categories: %}
@@ -19,7 +19,7 @@
         {% endfor %}
     </select>
     <button id='post-all'>Uncheck All Stores</button>
-    Send to:
+    Send to: {# put this in a for loop #}
     <input type='checkbox' id='post-d01' name='audience' value='D01'> District 1
     <input type='checkbox' id='post-d02' name='audience' value='D02'> District 2
     <input type='checkbox' id='post-d03' name='audience' value='D03'> District 3
@@ -31,9 +31,9 @@
         <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}' checked='checked'>{{ store.store_id }} {{ store.name }}
     {% endfor %}
     <br>
-    <div id='flash'>use javascript to make action/ deadline rquired</div>
-    Action required? <input type='checkbox' name='has_action' checked>
-    Action item: <input type='text/css' name='action_item' value="BLAH">
+    <div id='flash'>use javascript to make task/ deadline rquired</div>
+    Action required? <input type='checkbox' name='has_task' checked>
+    Action item: <input type='text/css' name='task_item' value='{{ fake_title }}'>
     Deadline: <input type='date' name='deadline'><br>
     <textarea name='post-content' rows='10' cols='50' required>{{ fake_text }}</textarea><br>
     <input type='submit'>

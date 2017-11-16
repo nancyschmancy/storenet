@@ -16,22 +16,22 @@
     <br>
 {% endfor %}
 
-{% if incomplete_actions %}
+{% if incomplete_tasks %}
     <h3>Tasks</h3>
-    <form action='/complete-action' method='post'>
-        {% for action in incomplete_actions %}
-            <input type='checkbox' name='completed-actions' value='{{action.action_id}}'>
-            <a href='view-post/{{ action.post_id }}'>{{ action.action_item }}</a> 
-            due on {{ action.deadline }}<br>
+    <form action='/complete-task' method='post'>
+        {% for task in incomplete_tasks %}
+            <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
+            <a href='view-post/{{ task.post_id }}'>{{ task.task_item }}</a> 
+            due on {{ task.deadline }}<br>
         {% endfor %}
         <input type='submit' value='Mark as completed'>
     </form>
 {% endif %}
 
-{% if complete_actions %}
+{% if complete_tasks %}
 <h3>Completed Tasks</h3>
-{% for action in complete_actions %}
-        {{ action.action_item }} completed on ___<br>
+{% for task in complete_tasks %}
+        {{ task.task_item }} completed on {{ task.complete_date }}<br>
     {% endfor %}
 {% endif %}
 

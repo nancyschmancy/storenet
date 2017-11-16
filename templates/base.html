@@ -3,36 +3,34 @@
 <head>
     <title>{% block title %} placeholder for title {% endblock %}</title>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script> 
     <script src="https://use.typekit.net/wmc8mdr.js"></script>
     <script>try{Typekit.load({ async: true });}catch(e){}</script>
     <link rel='stylesheet' type='text/css' href='/static/style.css'>
 </head>
 
-
 <body>
-    <h1><a href='/'>Storenet</a></h1>
-    
+
     <div id='navbar'>
+        <a href='/'><b>STORENET</b></a> | 
+
         {% if session.get('emp_id') %}  <!-- REMEMBER THIS! -->
             You are logged in as {{ session['name']}}. 
             <a href='/logout'>Log out</a>
             | <a href='/profile'>Your profile</a>
             | <a href='/view-stores'>Store Directory</a>
 
-
             {% if session.get('pos_id') == '01-SM' %}
             | <a href='#'>SM only menu item</a>
-            {% endif %}
+                {% endif %}
 
             {% if session.get('pos_id') == '10-DM' %}
-            | <a href='#'>only DM can accessS - check somthing out</a>
+                | <a href='#'>only DM can accessS - check somthing out</a>
             {% endif %}
 
             {% if session.get('pos_id') == '99-HQ' %}
-            | <a href='/post'>ADMIN ONLY: Post something</a>
+                | <a href='/post'>ADMIN ONLY: Post something</a>
             {% endif %}
-
-
         {% else %}
             <form action='/login' id='test-login' method='post'>
                 Employee ID: <input type='text' name='form_emp_id'>
@@ -41,6 +39,8 @@
             </form> 
         {% endif %}
     </div>
+
+    <hr>
 
     {% if session %}
         {% for message in get_flashed_messages() %}
@@ -55,31 +55,50 @@
     Code runs faster when Chuck Norris is watching it.
     
     {% endblock %}
-</body>
+
+<div id="chart">
+</div>
 
 
+<!-- D3 Data Visualization here-->
 <script type="text/javascript">
 
-// function completeLogin() {
-//     $('#test-login').html('results');
-// }
+var dataset = d3.json('data.json', function () {
 
-// function userLogin(evt) {
-//     evt.preventDefault();
+var width = 200;
+var height = 200;
+var radius = Math.min(width, height) / 2;
 
-//     console.log("I shall log you in");
+var color = d3.scaleOrdinal(d3.schemeCategory20b); 
 
-//     let form_input = {
-//                 "form_emp_id": $('#form_emp_id').val(),
-//                 "form_pw": $('form_pw').val()
-//                      }
+var svg = d3.select('#chart')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height)
+  .append('g')
+  .attr('transform', 'translate(' + (width / 2) +  ',' + (height / 2) + ')');
 
-//     $.post("/login", form_input, completeLogin);
-// };
+var arc = d3.arc()
+  .innerRadius(0)
+  .outerRadius(radius);
 
-// // And then this thing 'listens' for the submit
-// $('#test-login').on('submit', userLogin);
+var pie = d3.pie()
+  .value(function(d) { return d.count; })
+  .sort(null);
 
-// </script>
+var path = svg.selectAll('path')
+  .data(pie(dataset))
+  .enter()
+  .append('path')
+  .attr('d', arc)
+  .attr('fill', function(d, i) {
+    return color(d.data.label);
+  });
+
+});
+
+</script>
+ 
+</body>
 
 </html>

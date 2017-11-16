@@ -68,7 +68,7 @@ def make_chains(text_string, n):
     return chains
 
 
-def make_text(chains):
+def make_text(chains, length):
     """Return text from chains."""
 
     words = []
@@ -91,8 +91,9 @@ def make_text(chains):
     words = list(random_bigram)  # turns the random bigram into a list as starting pt.
     new_key = random_bigram  # reassigns the random ngram tuple to a new var
 
-    while True:  # ends the program if it comes across the end of the paragraph or a word
+    while len(" ".join(words)) < length:  # ends the program if it comes across the end of the paragraph or a word
                  # with a punctuation mark.
+        print len(' '.join(words))
         if chains[new_key] is None:
             break
 
@@ -114,8 +115,8 @@ def make_text(chains):
 
 # Get a Markov chain
 
-def trump_title():
-    chains = make_chains(text_string, 3)
-    random_text = make_text(chains)
+def trump_text(length):
+    chains = make_chains(text_string, 2)
+    random_text = make_text(chains, length)
 
     return random_text
