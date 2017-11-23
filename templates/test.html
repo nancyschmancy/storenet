@@ -4,16 +4,15 @@
 
 {% block body %}
 
+<h3>Search Results for <i>{{search_term}}</i>:</h3>
 
-
-{{ tasks|length}}
-
-{% for task in tasks %}
-
-{{ task.deadline }}<br>
-
-{% endfor %}
-
-
+{% if search_results %}
+    {% for result in search_results %}
+    <p><b><a href='/view-post/{{ result.post_id }}'>{{ result.title }}</a></b><br>
+    {{ result.text }}</p>
+    {% endfor %}
+{% else %}
+    <p>There are no search results for {{ search_term }}.
+{% endif %}
 
 {% endblock %}

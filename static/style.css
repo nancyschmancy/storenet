@@ -1,8 +1,15 @@
-html {
-    font-family: 'europa';
-    font-weight: 300;
-    font-size; 9px;
+body {
+    background-color: #c0c0c0 !important;
+}
+
+div {
+    font-family: 'Roboto', 'sans-serif';
     letter-spacing: .05em;
+}
+
+h3 {
+    font-family: 'Patua One', 'sans-serif' !important;
+    color: gray !important;
 }
 
 #post-list td {
@@ -21,4 +28,8 @@ html {
 
 #text-input {
     width: 500px;
+}
+
+.container {
+    padding: 100px;
 }

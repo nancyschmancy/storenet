@@ -4,72 +4,96 @@
 
 {% block body %}
 
-ADMIN ONLY WISHLILST
-<ol>
-  <li>how many posts are there</li>
-</ol>
+<div class='container-fluid'>
+  <div class="row">
+    <div class="col-xs-12 col-md-3 col-lg-3">
+      <div class="panel panel-default">
+        <div class="panel-body">
+        <h3>Store Dashboard</h3>
+        Store {{ session['store_id'] }} - {{ store.name }}<br><br>
+        <b>Today's Sales Projections</b><br>
+        $1500<br><br>
+        <b>Today's Weather</b>
+
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-6 col-lg-6">
+      <div class="panel panel-default">
+        <div class="panel-body">
+        <!-- POSTS GO HERE -->  
+        <h3>New posts</h3>
+        {% if assigned_posts %}
+          <table id="post-list" class='table table-hover'>
+            <tr>
+              <th>Title</th>
+              <th>Date Posted</th>
+              <th>Task</th>
+            </tr>
+            
+            {% for assigned_post in assigned_posts %}
+              <tbody>
+                {% if assigned_post.was_read == False %}
+                  <tr class='info'>
+                  <td><span class="label label-default">New</span>
+                {% else %}
+                  <tr>
+                  <td>
+                {% endif %}
+                  <a href='/view-post/{{ assigned_post.post_id }}'>{{ assigned_post.post.title }}</a>
+                </td>
+                <td>{{ assigned_post.post.date.strftime('%a, %m.%d.%y') }}</td>
+                <td>
+                  {% if assigned_post.post.tasks %}
+                  <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+                  {% endif %}
+                </td>
+              </tbody></tr>
+            {% endfor %}
+          </table>
+
+        {% else %}
+            Nothing here, buddy.
+        {% endif %}
+        <!-- END POSTS SECTION -->
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-12 col-md-3 col-lg-3">
+      <div class="panel panel-default">
+        <div class="panel-body">
+        <!-- TASKS SECTION -->
+        {% if incomplete_tasks %}
+        <h3>Your Tasks</h3>
+        <form action='/complete-task' method='post'>
+          {% for task in incomplete_tasks %}
+            <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
+            <a href='view-post/{{ task.post_id }}'>{{ task.task_item }}</a> due on {{ task.deadline }} which is in <b>{{ (task.deadline - current_date) }}</b>
+            <br>
+          {% endfor %}
+            <input class="btn btn-default" type="submit" value="Mark Complete">
+          </form>
+        {% endif %}
+
+        {% if complete_tasks %}
+        <h3>Completed Tasks</h3>
+        {% for task in complete_tasks %}
+                {{ task.task_item }} completed on {{ task.complete_date }}<br>
+            {% endfor %}
+        {% endif %}
+        <!-- END TASK SECTION -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 View post by category:
   {% for category in categories: %}
     <a href='/{{ category.cat_id }}'>{{ category.name }}</a> |
   {% endfor %}
 
-<!-- NEW POST SECTION -->
-<h3>New posts</h3>
-  {% if assigned_posts %}
-    <table id="post-list">
-      <tr>
-        <th>Title</th>
-        <th>Date Posted</th>
-        <th>Authored by</th>
-        <th>Task</th>
-        <th># of all Tasks assigned</th>
-        <th># of all posts assigned</th>
-      </tr>
-      
-      {% for assigned_post in assigned_posts %}
-        <tr>
-          <td>
-            {% if assigned_post.was_read == False %}
-                <span id='unread'>NEW!</span>
-            {% endif %}
-            <a href='/view-post/{{ assigned_post.post_id }}'>{{ assigned_post.post.title }}</a>
-          </td>
-          <td>{{ assigned_post.post.date.strftime('%a, %m.%d.%Y') }}</td>
-          <td>{{ assigned_post.post.employee.fname }}</td>
-          <td>
-            {% if assigned_post.post.tasks %}
-            yes
-            {% endif %}
-          </td>
-          <td>{{all_tasks}}</td>
-          <td>{{all_read}}</td>
-        </tr>
-      {% endfor %}
-    </table>
 
-  {% else %}
-      Nothing here, buddy.
-  {% endif %}
 
-<!-- TASKS SECTION -->
-{% if incomplete_tasks %}
-  <h3>Tasks</h3>
-  <form action='/complete-task' method='post'>
-    {% for task in incomplete_tasks %}
-      <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
-      <a href='view-post/{{ task.post_id }}'>{{ task.task_item }}</a> due on {{ task.deadline }} which is in <b>{{ (task.deadline - current_date) }}</b>
-      <br>
-    {% endfor %}
-        <input type='submit' value='Mark as completed'>
-    </form>
-{% endif %}
-
-{% if complete_tasks %}
-<h3>Completed Tasks</h3>
-{% for task in complete_tasks %}
-        {{ task.task_item }} completed on {{ task.complete_date }}<br>
-    {% endfor %}
-{% endif %}
 
 {% endblock %}

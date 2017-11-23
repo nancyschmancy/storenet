@@ -19,6 +19,8 @@ app.secret_key = 'SHHHHHH'
 
 app.jinja_env.undefined = StrictUndefined
 
+CURRENT_DATE = datetime.now()
+
 
 # ############################################################################
 
@@ -39,12 +41,12 @@ def index():
         categories = Category.query.all()
         all_tasks = Task.query.count()
         all_read = AssignedPost.query.count()
-        current_date = datetime.now()
+        store = Store.query.filter(Store.store_id == session['store_id']).one()
         return render_template('homepage.html', assigned_posts=assigned_posts,
                                incomplete_tasks=incomplete_tasks,
                                complete_tasks=complete_tasks,
                                categories=categories, all_tasks=all_tasks,
-                               all_read=all_read, current_date=current_date)
+                               all_read=all_read, current_date=CURRENT_DATE, store=store)
     else:
         return render_template('login.html')
 
@@ -67,7 +69,7 @@ def get_data(post_id):
 
 @app.route('/read-<post_id>.json')
 def get_post_data(post_id):
-    """ Gets data from storent database for data visualization. """
+    """ Gets data from storenet database for data visualization. """
 
     read = AssignedPost.query.filter(AssignedPost.post_id == post_id, AssignedPost.was_read.is_(True)).count()
     unread = AssignedPost.query.filter(AssignedPost.post_id == post_id, AssignedPost.was_read.is_(False)).count()
@@ -88,18 +90,23 @@ def display_store(store_id):
     return render_template('view-store.html', store_obj=store_obj)
 
 
-@app.route('/test')
-def test():
-    """ Testing query stuff """
+@app.route('/search', methods=['GET'])
+def search():
+    """ Simple search in posts """
 
-    tasks = Task.query.all()
+    search_term = request.args.get('search-term')
+    search_results = Post.query.filter((Post.title.ilike('%{}%'.format(search_term))) |
+                                       (Post.text.ilike('%{}%'.format(search_term)))).all()
 
-    return render_template('test.html', tasks=tasks)
+    return render_template('test.html', search_results=search_results,
+                           search_term=search_term)
+    # QUESTION: Can you get the search_term from the URL bar instead of
+    # sending it to template via this way?
 
 
 @app.route('/<cat_id>')
 def display_by_cat(cat_id):
-    """ Displays posts by category.. """
+    """ Displays posts by category. """
 
     posts_by_cat = Post.query.filter(Post.cat_id == cat_id).all()
 
@@ -117,7 +124,7 @@ def login():
     # Grab employee object from database
     employee = Employee.query.filter(Employee.emp_id == form_emp_id).first()
 
-    # Process login
+    # Process login & create session
     if employee and form_pw == employee.password:
         session['emp_id'] = employee.emp_id
         session['name'] = "{} {}".format(employee.fname, employee.lname)
@@ -125,7 +132,7 @@ def login():
         session['store_id'] = employee.store_id
         print session
     else:
-        flash("Login didn't work. Try again.")
+        flash("Login failed. Try again.")
 
     return redirect('/')
 
@@ -165,7 +172,7 @@ def preview_post():
     title = request.form.get('title')
     cat_id = request.form.get('category')
     text = request.form.get('post-content')
-    date = datetime.now()  # Make post ID the datetime to ensure uniqueness
+    date = CURRENT_DATE  # Make post ID the datetime to ensure uniqueness
     post_id = '{:0>4}{:0>2}{:0>2}{:0>2}{:0>2}{:0>2}'.format(date.year,
                                                             date.month,
                                                             date.day, date.hour,
@@ -220,7 +227,7 @@ def view_post(post_id):
                                             AssignedPost.emp_id == emp_id).one()
     assigned_post.was_read = True
     if assigned_post.read_date is None:  # Prevents read date from overwriting itself
-        assigned_post.read_date = datetime.now()
+        assigned_post.read_date = CURRENT_DATE
 
     # Try to make this a method i.e. assigned_post.mark_read
 
@@ -243,12 +250,9 @@ def assign_task():
     assignee = request.form.get('assignee')
     post_id = request.form.get('post_id')
     store_id = Employee.query.filter(Employee.emp_id == session['emp_id']).one().store.store_id
-    print store_id, 'this is the store'
     task = Task.query.filter(Task.post_id == post_id,
                              Task.store_id == store_id).one()
-    print task.task_id, 'this is the task ID'
     task.emp_id = assignee
-    print store_id, post_id, assignee, task
 
     db.session.commit()
 
@@ -269,7 +273,7 @@ def complete_task():
     # Update to completed
     for task in all_tasks:
         task.complete = True
-        task.complete_date = datetime.now()
+        task.complete_date = CURRENT_DATE
 
     db.session.commit()
 
