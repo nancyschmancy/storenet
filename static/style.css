@@ -5,6 +5,10 @@ html {
     letter-spacing: .05em;
 }
 
+#post-list td {
+    border: 1px solid #c0c0c0;
+}
+
 #flash {
     color: red;
     border: 1px solid red;
@@ -13,4 +17,8 @@ html {
 #unread {
     color: red;
     font: 10px bold;
+}
+
+#text-input {
+    width: 500px;
 }

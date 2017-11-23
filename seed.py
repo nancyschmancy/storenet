@@ -44,9 +44,13 @@ def make_stores():
     # Since I like to run this file over and over again:
     Store.query.delete()
 
+    # Create random endings for mall
+    mall_suffixes = ['Plaza', 'Premium Outlet', 'Mall', 'Centre',
+                     'Shopping Center']
+
     for store in range(1, 25):
         store_id = '{:0>3}'.format(store)
-        name = '{} Mall'.format(fake.street_name())
+        name = '{} {}'.format(fake.street_name(), choice(mall_suffixes))
         address = fake.address()
         phone = '({:0>3}) {:0>3}-{:0>4}'.format(fake.random_number(3),
                                                 fake.random_number(3),

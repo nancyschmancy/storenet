@@ -4,26 +4,63 @@
 
 {% block body %}
 
+ADMIN ONLY WISHLILST
+<ol>
+  <li>how many posts are there</li>
+</ol>
+
+View post by category:
+  {% for category in categories: %}
+    <a href='/{{ category.cat_id }}'>{{ category.name }}</a> |
+  {% endfor %}
+
+<!-- NEW POST SECTION -->
 <h3>New posts</h3>
+  {% if assigned_posts %}
+    <table id="post-list">
+      <tr>
+        <th>Title</th>
+        <th>Date Posted</th>
+        <th>Authored by</th>
+        <th>Task</th>
+        <th># of all Tasks assigned</th>
+        <th># of all posts assigned</th>
+      </tr>
+      
+      {% for assigned_post in assigned_posts %}
+        <tr>
+          <td>
+            {% if assigned_post.was_read == False %}
+                <span id='unread'>NEW!</span>
+            {% endif %}
+            <a href='/view-post/{{ assigned_post.post_id }}'>{{ assigned_post.post.title }}</a>
+          </td>
+          <td>{{ assigned_post.post.date.strftime('%a, %m.%d.%Y') }}</td>
+          <td>{{ assigned_post.post.employee.fname }}</td>
+          <td>
+            {% if assigned_post.post.tasks %}
+            yes
+            {% endif %}
+          </td>
+          <td>{{all_tasks}}</td>
+          <td>{{all_read}}</td>
+        </tr>
+      {% endfor %}
+    </table>
 
-{% for receipt in read_receipts %}
-    {% if receipt.was_read == False %}
-        <span id='unread'>NEW!</span>
-    {% endif %}
-    <a href='/view-post/{{ receipt.post_id }}'>{{ receipt.post.title }}</a>
-    {{ receipt.post.date }}
-    {{ receipt.post.employee.fname }}
-    <br>
-{% endfor %}
+  {% else %}
+      Nothing here, buddy.
+  {% endif %}
 
+<!-- TASKS SECTION -->
 {% if incomplete_tasks %}
-    <h3>Tasks</h3>
-    <form action='/complete-task' method='post'>
-        {% for task in incomplete_tasks %}
-            <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
-            <a href='view-post/{{ task.post_id }}'>{{ task.task_item }}</a> 
-            due on {{ task.deadline }}<br>
-        {% endfor %}
+  <h3>Tasks</h3>
+  <form action='/complete-task' method='post'>
+    {% for task in incomplete_tasks %}
+      <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
+      <a href='view-post/{{ task.post_id }}'>{{ task.task_item }}</a> due on {{ task.deadline }} which is in <b>{{ (task.deadline - current_date) }}</b>
+      <br>
+    {% endfor %}
         <input type='submit' value='Mark as completed'>
     </form>
 {% endif %}

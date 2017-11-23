@@ -9,11 +9,12 @@ Authored by {{ post.employee.fname }} |
 In category {{ post.category.name }} | 
 Posted on {{ post.date }}<br><br>
 
+<h3>This post has been assigned to {{ post.assigned_posts|length }} employees.</h3>
 
 {% if post.tasks %}
     This task is due on <b>{{ task.deadline }}</b>. Status: 
     {% if task.complete == False %}
-        INCOMPLETE.
+        <span id='flash'>INCOMPLETE.</span>
     {% else %}
         Completed on {{ task.complete_date }}
     {% endif %}
@@ -38,5 +39,87 @@ Posted on {{ post.date }}<br><br>
 
 <p>{{ post.text }}</p>
 
+<h3>THIS IS HOW MANY POEPLE VIEWD THIS POST</h3>
+<div id='read-chart'></div>
+<div id='task-chart'></div>
+
+<!-- D3 Data Visualization here-->
+<script type="text/javascript">
+    'use strict';
+
+  d3.json('/read-{{ post.post_id }}.json', function(data) {
+    let r = 100;
+
+    let color = d3.scale.ordinal()
+        .range(['blue', 'lightgray']);
+
+    let canvas = d3.select('#read-chart').append('svg')
+        .attr('width', 200)
+        .attr('height', 200)
+        .append('g')
+        .attr('transform', 'translate(100, 100)');
+
+    // Create the circle
+    let arc = d3.svg.arc() 
+        .innerRadius(0)
+        .outerRadius(r);
+
+    // Create the paths
+    let pie = d3.layout.pie()
+        .value((d) => d.count);
+
+    let wedgies = canvas.selectAll('arc')
+        .data(pie(data))
+        .enter()
+            .append('g')
+            .attr('class', 'arc');
+
+    wedgies.append('path')
+        .attr('d', arc)
+        .attr('fill', (d) => color(d.data.count))
+        .text((d) => d.data.label);
+
+    wedgies.append('text')
+        .text((d) =>    d.data.count);
+        
+        
+});
+
+  d3.json('/task-{{ post.post_id }}.json', function(data) {
+    let r = 100;
+
+    let color = d3.scale.ordinal()
+        .range(['darkgreen', 'lightgray']);
+
+    let canvas = d3.select('#task-chart').append('svg')
+        .attr('width', 200)
+        .attr('height', 200)
+        .append('g')
+        .attr('transform', 'translate(100, 100)');
+
+    // Create the circle
+    let arc = d3.svg.arc() 
+        .innerRadius(0)
+        .outerRadius(r);
+
+    // Create the paths
+    let pie = d3.layout.pie()
+        .value((d) => d.count);
+
+    let wedgies = canvas.selectAll('arc')
+        .data(pie(data))
+        .enter()
+            .append('g')
+            .attr('class', 'arc');
+
+    wedgies.append('path')
+        .attr('d', arc)
+        .attr('fill', (d) => color(d.data.count));
+
+    wedgies.append('text')
+        .text((d) => d.data.count);
+        
+});
+</script>
 
 {% endblock %}

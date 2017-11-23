@@ -109,12 +109,12 @@ class Post(db.Model):
         return '<Post {}, {}>'.format(self.post_id, self.title)
 
 
-class ReadReceipt(db.Model):
+class AssignedPost(db.Model):
     """ Tracks if post was read by employee. """
 
-    __tablename__ = 'read_receipt'
+    __tablename__ = 'assigned_posts'
 
-    receipt_id = db.Column(db.Integer, primary_key=True, nullable=False,
+    assigned_post_id = db.Column(db.Integer, primary_key=True, nullable=False,
                            autoincrement=True)
     post_id = db.Column(db.String(14), db.ForeignKey('posts.post_id'), nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
@@ -122,11 +122,11 @@ class ReadReceipt(db.Model):
     was_read = db.Column(db.Boolean, nullable=False)
     read_date = db.Column(db.DateTime, nullable=True)
 
-    post = db.relationship('Post', backref='read_receipt')
-    employee = db.relationship('Employee', backref='read_receipt')
+    post = db.relationship('Post', backref='assigned_posts')
+    employee = db.relationship('Employee', backref='assigned_posts')
 
     def __repr__(self):
-        """ Displays info about read receipt """
+        """ Displays info about read assigned_post """
 
         return "<WAS {} READ? {} {}>".format(self.post_id, self.employee.emp_id,
                                              self.was_read)
