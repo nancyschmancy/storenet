@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Storenet{% endblock %}
+
+{% block body %}
+{% if posts_by_cat == [] %}
+    NOTHING HERE FOOL
+{% else %}
+    <h3>Category {{ posts_by_cat[0].category.name }}</h3>
+    {% for post in posts_by_cat %}
+    <a href='/view-post/{{ post.post_id }}'>{{ post.title }}</a><br>
+{% endfor %}
+{% endif %}
+{% endblock %}

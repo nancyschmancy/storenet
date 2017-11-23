@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}edit this{% endblock %}
+
+{% block body %}
+
+<ol>
+<li>% of read posts</li>
+<li>% task completion</li>
+<li>list of unassigned tasks</li>
+</ol>
+
+<h1>This post has been viewed 
+    {{ task.task_id}}</h1>
+
+<h3>Store Information</h3>
+{{ store_obj.name }}<br>
+{{ store_obj.address }}<br>
+{{ store_obj.phone }}<br>
+
+<h3>Employee List</h3>
+{% for employee in store_obj.employees|sort(attribute='pos_id') %}
+    {{ employee.fname }} {{ employee.lname }}, {{ employee.position.title }}<br>
+
+{% endfor %}
+
+<h3>Incomplete Tasks</h3>
+
+{% for task in store_obj.tasks|selectattr('complete', 'equalto', False) %}
+    <a href='/view-post/{{ task.post_id }}'>{{ task.task_item }}</a> assigned to {{ task.employee.fname}} {{task.employee.lname }}<br>
+{% endfor %}
+
+<h3>Unassigned Tasks</h3>
+
+{% for task in store_obj.tasks %}
+{{ task.task_item }} assigned to {{ task.emp_id}}<br>
+{% endfor %}
+
+{% endblock %}

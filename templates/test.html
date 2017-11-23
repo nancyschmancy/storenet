@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Welcome to Storenet{% endblock %}
+
+{% block body %}
+
+
+
+{{ tasks|length}}
+
+{% for task in tasks %}
+
+{{ task.deadline }}<br>
+
+{% endfor %}
+
+
+
+{% endblock %}
