@@ -10,7 +10,7 @@
 <ul>
 <h3>{{ district.name }}</h3>
     {% for store in district.stores %}
-    <li><b>{{ store.store_id}} {{ store.name}}</b><br>
+    <li><b><a href='/view-stores/{{ store.store_id }}'>{{ store.store_id}} {{ store.name}}</a></b><br>
         {{ store.address }}<br>
         {{ store.phone }}<br>
         Store Manager: {{ sm_dict[store.store_id] }}<br><br>

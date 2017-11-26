@@ -9,7 +9,6 @@ from random import choice
 
 fake = Faker()
 
-
 def make_districts():
     """ Let's make some districts! """
 
@@ -45,16 +44,14 @@ def make_stores():
     Store.query.delete()
 
     # Create random endings for mall
-    mall_suffixes = ['Plaza', 'Premium Outlet', 'Mall', 'Centre',
-                     'Shopping Center']
+    # mall_suffixes = ['Plaza', 'Premium Outlet', 'Mall', 'Centre',
+    #                  'Shopping Center']
 
-    for store in range(1, 25):
-        store_id = '{:0>3}'.format(store)
-        name = '{} {}'.format(fake.street_name(), choice(mall_suffixes))
-        address = fake.address()
-        phone = '({:0>3}) {:0>3}-{:0>4}'.format(fake.random_number(3),
-                                                fake.random_number(3),
-                                                fake.random_number(4))
+    for row in open('misc/seed_stores.txt'):
+        row = row.rstrip()
+        store_id, name, address, city, state, zipcode, phone = row.split('\t')
+        store_id = "{:0>3}".format(store_id)
+        zipcode = "{:0>5}".format(zipcode)
         district_id = get_random_district()
 
         # Instantiate a store using Store class in model.py! Woohoo!
@@ -62,6 +59,9 @@ def make_stores():
                       name=name,
                       address=address,
                       phone=phone,
+                      city=city,
+                      state=state,
+                      zipcode=zipcode,
                       district_id=district_id)
 
         # Add to db
@@ -188,9 +188,12 @@ def add_nancy():
 
     corp_store = Store(store_id='999',
                        name='Corporate Headquarters',
-                       address='123 Main Street\nAnywhere, USA 12345',
-                       phone='(415) 555-1234',
+                       address='400 Valley Drive',
+                       city='Brisbane',
+                       state='CA',
+                       zipcode='94005', phone='(415) 555-1234', 
                        district_id='D99')
+
 
     nancy = Employee(emp_id='09332', fname='Nancy',
                      lname='Reyes', ssn='123-45-6789',

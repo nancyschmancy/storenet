@@ -10,8 +10,10 @@
 <li>list of unassigned tasks</li>
 </ol>
 
-<h1>This post has been viewed 
-    {{ task.task_id}}</h1>
+     <b>Today's Weather</b><br>
+        <img src="{{ weather.icon }}"> {{ weather.desc }}
+        </div>
+
 
 <h3>Store Information</h3>
 {{ store_obj.name }}<br>
@@ -26,14 +28,9 @@
 
 <h3>Incomplete Tasks</h3>
 
-{% for task in store_obj.tasks|selectattr('complete', 'equalto', False) %}
-    <a href='/view-post/{{ task.post_id }}'>{{ task.task_item }}</a> assigned to {{ task.employee.fname}} {{task.employee.lname }}<br>
-{% endfor %}
+
 
 <h3>Unassigned Tasks</h3>
 
-{% for task in store_obj.tasks %}
-{{ task.task_item }} assigned to {{ task.emp_id}}<br>
-{% endfor %}
 
 {% endblock %}

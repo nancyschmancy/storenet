@@ -28,6 +28,9 @@ class Store(db.Model):
     store_id = db.Column(db.String(3), primary_key=True, nullable=False)
     name = db.Column(db.String(255), nullable=False)
     address = db.Column(db.String(255), nullable=False)
+    city = db.Column(db.String(75), nullable=False)
+    state = db.Column(db.String(2), nullable=False)
+    zipcode = db.Column(db.String(5), nullable=False)
     phone = db.Column(db.String(14), nullable=False)
     district_id = db.Column(db.String(3),
                             db.ForeignKey('districts.district_id'),
@@ -115,7 +118,7 @@ class AssignedPost(db.Model):
     __tablename__ = 'assigned_posts'
 
     assigned_post_id = db.Column(db.Integer, primary_key=True, nullable=False,
-                           autoincrement=True)
+                                 autoincrement=True)
     post_id = db.Column(db.String(14), db.ForeignKey('posts.post_id'), nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
@@ -138,7 +141,7 @@ class Task(db.Model):
     __tablename__ = 'task'
 
     task_id = db.Column(db.Integer, primary_key=True, nullable=False,
-                          autoincrement=True)
+                        autoincrement=True)
     post_id = db.Column(db.String(14), db.ForeignKey('posts.post_id'),
                         primary_key=True, nullable=False)
     store_id = db.Column(db.String(3), db.ForeignKey('stores.store_id'),

@@ -13,8 +13,8 @@
         Store {{ session['store_id'] }} - {{ store.name }}<br><br>
         <b>Today's Sales Projections</b><br>
         $1500<br><br>
-        <b>Today's Weather</b>
-
+        <b>Current Weather</b><br>
+        <img src="{{ weather.icon }}"> {{ weather.desc }}
         </div>
       </div>
     </div>
@@ -92,8 +92,5 @@ View post by category:
   {% for category in categories: %}
     <a href='/{{ category.cat_id }}'>{{ category.name }}</a> |
   {% endfor %}
-
-
-
 
 {% endblock %}

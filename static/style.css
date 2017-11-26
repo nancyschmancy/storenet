@@ -7,6 +7,10 @@ div {
     letter-spacing: .05em;
 }
 
+.panel-body {
+    font-size: 12px;
+}
+
 h3 {
     font-family: 'Patua One', 'sans-serif' !important;
     color: gray !important;

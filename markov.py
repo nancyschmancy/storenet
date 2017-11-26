@@ -72,7 +72,7 @@ def make_text(chains, length):
     """Return text from chains."""
 
     words = []
-    punctuation = ['.']
+    punctuation = ['!']
     punct = set(string.punctuation)
 
     # If random_bigram's tuple starts with a capital letter or punctuation, break
@@ -116,7 +116,7 @@ def make_text(chains, length):
 # Get a Markov chain
 
 def trump_text(length):
-    chains = make_chains(text_string, 2)
+    chains = make_chains(text_string, 3)
     random_text = make_text(chains, length)
 
     return random_text

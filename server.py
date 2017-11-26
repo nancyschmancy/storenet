@@ -1,5 +1,6 @@
 """ Server file for Project Storenet """
 
+import os
 from jinja2 import StrictUndefined
 from flask import (Flask, render_template, redirect, session, flash, request,
                    jsonify)
@@ -10,19 +11,34 @@ from datetime import datetime
 from sqlalchemy import desc
 from faker import Faker
 from markov import trump_text
+import requests
+
+CURRENT_DATE = datetime.now()
+OW_KEY = os.environ['OPENWEATHER_API_KEY']
 
 fake = Faker()
 
 app = Flask(__name__)
 
-app.secret_key = 'SHHHHHH'
+app.secret_key = 'CHUCK_NORRIS'
 
 app.jinja_env.undefined = StrictUndefined
 
-CURRENT_DATE = datetime.now()
-
 
 # ############################################################################
+
+
+def get_weather(zipcode):
+    """ Helper function to get weather information for store dashboard. """
+
+    result = requests.get('http://api.openweathermap.org/data/2.5/weather?zip=' + zipcode + ',us&appid=' + OW_KEY)
+    json_result = result.json()
+
+    weather_dict = {}
+    weather_dict['desc'] = json_result['weather'][0]['description']
+    weather_dict['icon'] = 'http://openweathermap.org/img/w/{}.png'.format(json_result['weather'][0]['icon'])
+
+    return weather_dict
 
 
 @app.route('/')
@@ -42,11 +58,13 @@ def index():
         all_tasks = Task.query.count()
         all_read = AssignedPost.query.count()
         store = Store.query.filter(Store.store_id == session['store_id']).one()
+        weather = get_weather(store.zipcode)
         return render_template('homepage.html', assigned_posts=assigned_posts,
                                incomplete_tasks=incomplete_tasks,
                                complete_tasks=complete_tasks,
                                categories=categories, all_tasks=all_tasks,
-                               all_read=all_read, current_date=CURRENT_DATE, store=store)
+                               all_read=all_read, current_date=CURRENT_DATE,
+                               store=store, weather=weather)
     else:
         return render_template('login.html')
 
@@ -81,13 +99,15 @@ def get_post_data(post_id):
     return jsonify(data)
 
 
-@app.route('/store/<store_id>')
+@app.route('/view-stores/<store_id>')
 def display_store(store_id):
     """ Displays stuff about a store. """
 
     store_obj = Store.query.filter(Store.store_id == store_id).one()
+    weather = get_weather(store_obj.zipcode)
+    print weather
 
-    return render_template('view-store.html', store_obj=store_obj)
+    return render_template('view-store.html', store_obj=store_obj, weather=weather)
 
 
 @app.route('/search', methods=['GET'])
@@ -104,7 +124,7 @@ def search():
     # sending it to template via this way?
 
 
-@app.route('/<cat_id>')
+@app.route('/category/<cat_id>')
 def display_by_cat(cat_id):
     """ Displays posts by category. """
 
@@ -195,8 +215,8 @@ def preview_post():
                                     # consolidate this, refactor to make more flexible
         for employee in employees:
             emp_assigned_post = AssignedPost(post_id=post_id,
-                                           emp_id=employee.emp_id,
-                                           was_read=False)
+                                             emp_id=employee.emp_id,
+                                             was_read=False)
             db.session.add(emp_assigned_post)
 
     # Task section:
@@ -224,7 +244,7 @@ def view_post(post_id):
     # Read assigned_post:
     emp_id = session['emp_id']
     assigned_post = AssignedPost.query.filter(AssignedPost.post_id == post_id,
-                                            AssignedPost.emp_id == emp_id).one()
+                                              AssignedPost.emp_id == emp_id).one()
     assigned_post.was_read = True
     if assigned_post.read_date is None:  # Prevents read date from overwriting itself
         assigned_post.read_date = CURRENT_DATE
