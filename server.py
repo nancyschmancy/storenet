@@ -5,6 +5,7 @@ from jinja2 import StrictUndefined
 from flask import (Flask, render_template, redirect, session, flash, request,
                    jsonify)
 from flask_debugtoolbar import DebugToolbarExtension
+from werkzeug.utils import secure_filename
 from model import (Employee, Store, Post, District, AssignedPost, Category, Task,
                    connect_to_db, db)
 from datetime import datetime
@@ -15,10 +16,14 @@ import requests
 
 CURRENT_DATE = datetime.now()
 OW_KEY = os.environ['OPENWEATHER_API_KEY']
+UPLOAD_FOLDER = '/home/vagrant/src/storenet/static/pdf'
+UPLOAD_URL_PREFIX = '/static/pdf/'
+ALLOWED_EXTENSIONS = set(['pdf'])
 
 fake = Faker()
 
 app = Flask(__name__)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.secret_key = 'CHUCK_NORRIS'
 
@@ -36,9 +41,15 @@ def get_weather(zipcode):
 
     weather_dict = {}
     weather_dict['desc'] = json_result['weather'][0]['description']
+    weather_dict['place'] = json_result['name']
     weather_dict['icon'] = 'http://openweathermap.org/img/w/{}.png'.format(json_result['weather'][0]['icon'])
 
     return weather_dict
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @app.route('/')
@@ -105,9 +116,25 @@ def display_store(store_id):
 
     store_obj = Store.query.filter(Store.store_id == store_id).one()
     weather = get_weather(store_obj.zipcode)
-    print weather
+
+    rating = {}
+    num_tasks = Task.query.filter(Task.store_id == store_id).count()
+    num_tasks_complete = Task.query.filter(Task.store_id == store_id,
+                                            Task.complete == True).count()
+
+    # num_assigned_posts = AssignedPost.query.filter(AssignedPost.employee.store_id == store_id).count()
+    # num_assigned_posts_read = AssignedPost.query.filter(AssignedPost.employee.store_id == store_id,
+    #                                        AssignedPost.was_read == True).count()
+    print num_tasks, num_tasks_complete
+
+    result = db.engine.execute("select count(*) from assigned_posts \
+                    join employees on employees.emp_id=assigned_posts.emp_id\
+            join stores on stores.store_id=employees.store_id\
+            where stores.store_id = '999'")
 
     return render_template('view-store.html', store_obj=store_obj, weather=weather)
+
+
 
 
 @app.route('/search', methods=['GET'])
@@ -115,10 +142,10 @@ def search():
     """ Simple search in posts """
 
     search_term = request.args.get('search-term')
-    search_results = Post.query.filter((Post.title.ilike('%{}%'.format(search_term))) |
-                                       (Post.text.ilike('%{}%'.format(search_term)))).all()
+    search_results = Post.query.filter((Post.title.ilike('% {} %'.format(search_term))) |
+                                       (Post.text.ilike('% {} %'.format(search_term)))).all()
 
-    return render_template('test.html', search_results=search_results,
+    return render_template('search-results.html', search_results=search_results,
                            search_term=search_term)
     # QUESTION: Can you get the search_term from the URL bar instead of
     # sending it to template via this way?
@@ -138,8 +165,8 @@ def login():
     """ Processes login. """
 
     # Grab emp_id & password from site
-    form_emp_id = request.form.get('form_emp_id')
-    form_pw = request.form.get('form_pw')
+    form_emp_id = request.form.get('form-emp-id')
+    form_pw = request.form.get('form-pw')
 
     # Grab employee object from database
     employee = Employee.query.filter(Employee.emp_id == form_emp_id).first()
@@ -150,7 +177,6 @@ def login():
         session['name'] = "{} {}".format(employee.fname, employee.lname)
         session['pos_id'] = employee.pos_id
         session['store_id'] = employee.store_id
-        print session
     else:
         flash("Login failed. Try again.")
 
@@ -189,7 +215,17 @@ def post_stuff():
 def preview_post():
     """ Preview what the almighty admin has posted."""
 
-    title = request.form.get('title')
+    # File section
+    file = request.files['file']
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        pdf_url = '{}{}'.format(UPLOAD_URL_PREFIX, filename)
+    else:
+        pdf_url = None
+
+    # Look up Flask Upload!
+    title = request.form.get('title-input')
     cat_id = request.form.get('category')
     text = request.form.get('post-content')
     date = CURRENT_DATE  # Make post ID the datetime to ensure uniqueness
@@ -200,7 +236,7 @@ def preview_post():
                                                             date.second)
     emp_id = session['emp_id']
     post = Post(post_id=post_id, title=title, cat_id=cat_id,
-                date=date, text=text, emp_id=emp_id)
+                date=date, text=text, emp_id=emp_id, pdf_url=pdf_url)
 
     db.session.add(post)
 
@@ -308,7 +344,20 @@ def view_profile():
     employee = (Employee.query.filter(Employee.emp_id == session['emp_id'])
                 .first())
 
-    return render_template('profile.html', obj=employee)
+    # TODO: You can probably consolidate this into one function called by stores and whatnot
+    rating = {}
+    num_tasks = Task.query.filter(Task.emp_id == session['emp_id']).count()
+    num_tasks_complete = Task.query.filter(Task.emp_id == session['emp_id'],
+                                            Task.complete == True).count()
+
+    num_assigned_posts = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id']).count()
+    num_assigned_posts_read = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id'],
+                                            AssignedPost.was_read == True).count()
+
+    rating = {'tasks': [num_tasks, num_tasks_complete], 'posts': [num_assigned_posts, num_assigned_posts_read]}
+
+    return render_template('profile.html', obj=employee,
+                           rating=rating)
 
 
 @app.route('/view-stores')

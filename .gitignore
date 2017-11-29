@@ -2,3 +2,4 @@
 *.pyc
 *secret*
 /misc
+/static/pdf

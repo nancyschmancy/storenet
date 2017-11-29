@@ -102,6 +102,7 @@ class Post(db.Model):
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=False)
     cat_id = db.Column(db.String(3), db.ForeignKey('categories.cat_id'), nullable=False)
+    pdf_url = db.Column(db.String(75), nullable=True)
 
     employee = db.relationship('Employee', backref='posts')
     category = db.relationship('Category', backref='posts')

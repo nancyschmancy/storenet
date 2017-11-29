@@ -1,64 +1,104 @@
 {% extends 'base.html' %}
 
-{% block title %}Post a memo{% endblock %}
+{% block title %}Make a Post{% endblock %}
 
 {% block body %}
-
-<p>Greetings, almighty admin. You have the highest security clearance on this
-    amazing web app. Cheers!</p>
-
-<h3>What do you have to say?</h3> <!--hide this-->
-
-<form action='/preview-post' method='post' id='post-stuff-box'>
-    <div id='form-inputs'>
-        Title: <input id='title-input' type='text' name='title' required value='{{ fake_title }}'><br>
-    Post Category:
-    <select name='category'>
-        {% for category in categories: %}
-        <option value='{{ category.cat_id }}'>{{ category.name }}
-        </option>
-        {% endfor %}
-    </select>
-    <button id='post-all'>Select All Stores</button>
-    Send to: {# put this in a for loop #}
-    <button id='post-d01' name='audience' value='D01'> District 1</button>
-    <button id='post-d02' name='audience' value='D02'> District 2</button>
-    <button id='post-d03' name='audience' value='D03'> District 3</button>
-    <button id='post-d04' name='audience' value='D04'> District 4</button>
-    <button id='post-d05' name='audience' value='D05'> District 5</button>
+<!-- QUESTION: I put the form stuff up here. Feels yucky -->
+<div class='row'>
+  <div class="col-xs-12 col-md-6 col-lg-6">
     <br>
-    Or select a store:
-    {% for store in stores %}
+    <div class="card" >
+      <div class="card-header">
+      Create a Post
+      </div>
+      <div class="card-body">
+      <!-- BEGIN CONTENT-->
+      <form action='/preview-post' method='post' id='post-stuff-box' enctype='multipart/form-data'>
+        Title
+        <input class="form-control form-control-lg" type="text" placeholder="Title"name="title-input" required value='{{ fake_title }}'>
+        Post Category:
+          <select class="form-control form-control-md" name='category'>
+          {% for category in categories: %}
+          <option value='{{ category.cat_id }}'>{{ category.name }}</option>
+          {% endfor %}
+          </select>
+        Content
+        <textarea class="form-control form-control-md" id='post-content' name='post-content' rows='20' required>{{ fake_text }}</textarea>
+
+</div></div></div>        
+        <div class="col-xs-12 col-md-3 col-lg-3">
+    <br>
+    <div class="card" >
+      <div class="card-header">
+      Select audience
+      </div>
+      <div class="card-body">
+
+        <button id='post-all'>Select All Stores</button>
+        Send to: {# put this in a for loop #}
+        <button id='post-d01' name='audience' value='D01'> District 1</button>
+        <button id='post-d02' name='audience' value='D02'> District 2</button>
+        <button id='post-d03' name='audience' value='D03'> District 3</button>
+        <button id='post-d04' name='audience' value='D04'> District 4</button>
+        <button id='post-d05' name='audience' value='D05'> District 5</button>
+        <br>
+        Or select a store:
+        {% for store in stores %}
         <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}'>{{ store.store_id }} {{ store.name }}<br>
-    {% endfor %}
+        {% endfor %}
+        <br>
+
+
+</div></div></div>        
+        <div class="col-xs-12 col-md-3 col-lg-3">
     <br>
-    <input type='file' name='file'>
-    Task required? <input id='task-required-checkbox' type='checkbox' name='has_task'>
+    <div class="card" >
+      <div class="card-header">
+Action required?
+      </div>
+      <div class="card-body">
 
-    <div id='task-assign-section' hidden>
-    Task item: <input id='task-desc-input' class='text-input' type='text/css' name='task_item' value='{{ fake_title }}'>
-    Deadline: <input id='task-deadline-input' type='date' name='deadline'><br>
-    </div>
+     
 
-    <textarea id='post-content' name='post-content' rows='10' cols='50' required>{{ fake_text }}</textarea><br>
-    </div>
-    <div id='post-preview' hidden></div>
-    <button id='post-preview-button'>Preview Post</button>
-    <button id='edit-post-button' hidden>Edit Post</button>
-    <input id='post-stuff' type='submit' value="POST!">
+      </form>
 
-</form>
-<div id='preview-post'></div>
+
+        
+
+         Task required? <input id='task-required-checkbox' type='checkbox' name='has_task'>
+
+        <div id='task-assign-section'>
+          Task item: <input id='task-desc-input' class='text-input' type='text/css' name='task_item' value='{{ fake_title }}'>
+          Deadline: <input id='task-deadline-input' type='date' name='deadline'>
+        </div>   
+
+          <input type='file' name='file'>
+
+          <div id='post-preview' hidden></div>
+
+          <button id='post-preview-button'>Preview Post</button>
+          <button id='edit-post-button' hidden>Edit Post</button>
+          <input id='post-stuff' type='submit' value="POST!">
+
+          </form>
+          
+      <!-- END CONTENT -->
+      </div><!--card-body-->
+    </div><!--card-->
+  </div><!--width class-->
+</div><!--row-->
+
+
+
+
+
+
+
+
+
 
 <script type="text/javascript">
     "use strict";
-
-function previewPost() {
-    let postTitle = $('#title-input').val();
-    let postText = $('#post-content').val();
-    console.log(postTitle);
-    console.log(postText);
-};
 
 // Preview post stuff
 $('#post-preview-button').on('click', function (evt) {
@@ -90,11 +130,11 @@ $('#edit-post-button').on('click', function (evt) {
 
 // Make task assignment section appear when 'task required' is checked
 $('#task-required-checkbox').click(function () {
-    if (this.checked) {
-        $('#task-assign-section').show();
-    } else {
-        $('#task-assign-section').hide();
-    }
+  if (this.checked) {
+    $('#task-assign-section').show();
+  } else {
+    $('#task-assign-section').hide();
+  }
 });
 
 // Select all store checkboxes

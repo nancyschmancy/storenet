@@ -6,6 +6,20 @@
 
 <h3>Details for {{ obj.fname }} {{ obj.lname}}</h3>
 
+Task completion Rate
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: {{ rating['tasks'][1]/rating['tasks'][0] * 100}}%;" aria-valuenow="{{ rating['tasks'][1]/rating['tasks'][0] * 100}}" aria-valuemin="0" aria-valuemax="100"> {{ rating['tasks'][1]/rating['tasks'][0] * 100}}%
+  </div>
+</div>
+
+Post read rating
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: {{ rating['posts'][1]/rating['posts'][0] * 100}}%;" aria-valuenow="{{ rating['posts'][1]/rating['posts'][0] * 100}}" aria-valuemin="0" aria-valuemax="100"> {{ rating['posts'][1]/rating['posts'][0] * 100}}%
+  </div>
+</div>
+
+
+
 <ul>
     <li>{{ obj.fname }} {{ obj.lname }}</li>
     <li><b>Employee ID:</b> {{ obj.emp_id }}</li>

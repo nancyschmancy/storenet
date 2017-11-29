@@ -2,76 +2,70 @@
 <html>
 <head>
     <title>{% block title %} placeholder for title {% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel='stylesheet' type='text/css' href='/static/style.css'>
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://d3js.org/d3.v3.min.js"></script> 
-    <link href="https://fonts.googleapis.com/css?family=Patua+One|Roboto" rel="stylesheet">
-    <script>try{Typekit.load({ async: true });}catch(e){}</script>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Barlow|Passion+One" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
 </head>
 
 <body>
 
 {% if session.get('emp_id') %}
-<!-- BOOTSTRAP -->
-<nav class="navbar navbar-default">
-  <div class="container-fluid">
-    <!-- Brand and toggle get grouped for better mobile display -->
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a class="navbar-brand" href='/'>STORENET</a>
-    </div>
+<div class='container-fluid'>
+<!-- BOOTSTRAP 4.0 -->
 
-    <!-- Collect the nav links, forms, and other content for toggling -->
-    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-      <ul class="nav navbar-nav">
-        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
-        {% if session.get('pos_id') == '01-SM' %}
-        <li><a href='#'>SM only menu item</a></li>
-        {% endif %}
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href='/'>Storenet</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
-        {% if session.get('pos_id') == '10-DM' %}
-        <li><a href='#'>only DM can accessS - check somthing out</a>
-        {% endif %}
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item active">
+        <a class="nav-link" href="/view-stores">View Stores <span class="sr-only">(current)</span></a>
+      </li>
+      {% if session.get('pos_id') == '01-SM' %}
+      <li><a class="nav-link" href='#'>SM only menu item</a></li>
+      {% endif %}
 
-        {% if session.get('pos_id') == '99-HQ' %}
-        <li><a href='/post'>ADMIN ONLY: Post</a></li>
-        {% endif %}
-        <li class="dropdown">
-          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
-          <ul class="dropdown-menu">
-            <li><a href='/view-stores'>Store Directory</a></li>
-            <li><a href='/profile'>Your profile</a></li>
-            <li><a href="#">Action</a></li>
-            <li><a href="#">Another action</a></li>
-            <li><a href="#">Something else here</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">Separated link</a></li>
-            <li role="separator" class="divider"></li>
-            <li><a href="#">One more separated link</a></li>
-          </ul>
-        </li>
-      </ul>
-      <form class="navbar-form navbar-left" action='/search' method='get'>
-        <div class="form-group">
-          <input type="text" class="form-control" placeholder='Search' name='search-term'>
+      {% if session.get('pos_id') == '10-DM' %}
+      <li><a class="nav-link" href='#'>only DM can accessS - check somthing out</a>
+      {% endif %}
+
+      {% if session.get('pos_id') == '99-HQ' %}
+      <li><a class="nav-link" href='/post'>ADMIN ONLY: Post</a></li>
+      {% endif %}
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+    </ul>
+    <form action='/search' method='get' class="form-inline my-2 my-lg-0">
+      <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name='search-term'>
+      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      <ul class="navbar-nav mr-auto">
+    <li class="nav-item my-2 my-lg-0">
+    <a class="nav-link disabled" href="#">Disabled</a></li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <b>{{ session['name'] }}</b>
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" href="/profile">View Profile</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" href="/logout">Log Out</a>
         </div>
-        <button type="submit" class="btn btn-default">Submit</button>
-      </form>
-      <ul class="nav navbar-nav navbar-right">
-        <li class="navbar-text">Logged in as {{ session['name'] }}</li>
-        <li><a href='/logout'>Log out</a></li>
-      </ul>
-    </div><!-- /.navbar-collapse -->
-  </div><!-- /.container-fluid -->
+      </li>
+</ul>
+    </form>
+  </div>
 </nav>
-
 <!-- END BOOTSTRAP -->
+
+</div> <!-- container -->
 {% endif %}
 
 <div class='container-fluid'>
@@ -84,14 +78,17 @@
   {% endif %}
 </div>
 
+<div class='container-fluid'>
 {% block body %}
 
 ALL THE STUFF GOES HERE!
 
 {% endblock %}
+</div>
 
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
 </body>
 

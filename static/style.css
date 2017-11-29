@@ -1,18 +1,14 @@
 body {
-    background-color: #c0c0c0 !important;
+    background-color: #d0d0d0 !important;
 }
 
 div {
-    font-family: 'Roboto', 'sans-serif';
+    font-family: 'Barlow', 'sans-serif';
     letter-spacing: .05em;
 }
 
-.panel-body {
-    font-size: 12px;
-}
-
 h3 {
-    font-family: 'Patua One', 'sans-serif' !important;
+    font-family: 'Passion One', 'sans-serif' !important;
     color: gray !important;
 }
 
@@ -28,10 +24,6 @@ h3 {
 #unread {
     color: red;
     font: 10px bold;
-}
-
-#text-input {
-    width: 500px;
 }
 
 .container {
