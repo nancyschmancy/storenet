@@ -48,8 +48,9 @@
         {% endif %}
         <!-- END TASK SECTION -->
         <!-- DATA VIZ -->
-        <h3>THIS IS HOW MANY POEPLE VIEWD THIS POST</h3>
+        <h3>Post Views (all company)</h3>
           <div id='read-chart'></div>
+          <h3>Task completion (all_company)</h3>
           <div id='task-chart'></div>
         <!-- END DATA VIZ -->
         </div>
@@ -68,7 +69,7 @@
     let r = 100;
 
     let color = d3.scale.ordinal()
-        .range(['blue', 'lightgray']);
+        .range(['blue', 'gray']);
 
     let canvas = d3.select('#read-chart').append('svg')
         .attr('width', 200)
@@ -104,7 +105,7 @@
     let r = 100;
 
     let color = d3.scale.ordinal()
-        .range(['darkgreen', 'lightgray']);
+        .range(['gray', 'green']);
 
     let canvas = d3.select('#task-chart').append('svg')
         .attr('width', 200)

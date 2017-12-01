@@ -15,12 +15,14 @@
         $1500<br><br>
         <b>Current Weather for {{ weather.place }}</b><br>
         <img src="{{ weather.icon }}"> {{ weather.desc }}
+        <h3> Unassigned Tasks </h3> <span class="badge badge-pill badge-danger">2</span>
+
         </div>
       </div>
     </div>
     <div class="col-xs-12 col-md-6 col-lg-6">
       <div class="card">
-        <div class="card-body" id='post-content'>
+        <div class="card-body">
         <!-- POSTS GO HERE -->  
 
           <div class="card text-center" class="col-xs-12 col-md-6 col-lg-6">
@@ -37,24 +39,16 @@
                 </li>
               </ul>
             </div>
-            <div class="card-body">
-              <h4 class="card-title">Special title treatment</h4>
-              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-              <a href="#" class="btn btn-primary">Go somewhere</a>
-            </div>
-          </div>
-
-
-
-
-        <h3>New posts</h3>
+            <div class="card-body" id='post-content'>
+              <h3>New posts</h3>
+              <!-- begin posts -->
         {% if assigned_posts %}
           {% for assigned_post in assigned_posts %}
             {% if assigned_post.was_read == False %}
             <span class="badge badge-success">NEW</span>
             {% endif %}
             <a href='/view-post/{{ assigned_post.post_id }}'>{{ assigned_post.post.title }}</a>
-            {{ assigned_post.post.date.strftime('%a, %m.%d.%y') }}</td>
+            {{ assigned_post.post.date.strftime('%a, %m.%d.%y') }}<br>
             {% if assigned_post.post.tasks %}
             <div class="progress" width='300'>
               <div class="progress-bar" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
@@ -65,7 +59,37 @@
         {% else %}
             There are no new posts.
         {% endif %}
-        <!-- END POSTS SECTION -->
+        <!-- end posts -->
+              <a href="#" class="btn btn-primary">View more posts</a>
+            </div>
+          </div>
+
+<table class="table table-responsive-lg">
+<tr>
+  <td>Sun</td>
+  <td>Mon</td>
+  <td>Tue</td>
+  <td>Wed</td>
+  <td id='4'>Thu</td>
+  <td>Fri</td>
+  <td>Sat</td>
+</tr>
+<tr>
+  <td>Event</td>
+  <td>Event</td>
+  <td>Event</td>
+  <td>No event</td>
+  <td>Markdowns</td>
+  <td>Task due</td>
+  <td>Blah</td>
+</tr>
+
+
+.post {{ calendar }}
+
+
+</table>
+
         </div>
       </div>
     </div>

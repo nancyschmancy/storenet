@@ -14,6 +14,16 @@
         <img src="{{ weather.icon }}"> {{ weather.desc }}
         </div>
 
+<h3> metrics</h3>
+{{ metrics }}
+<h3> unassigned_tasks</h3>
+{% for task in metrics['unassigned_tasks'] %}
+<a href="/view-post/{{ task.post_id }}">{{ task.task_item}}</a><br>
+{% endfor %}
+
+<h3> Latest Sales</h3>
+${{fake_sales}}
+
 
 <h3>Store Information</h3>
 {{ store_obj.name }}<br>
@@ -27,8 +37,6 @@
 {% endfor %}
 
 <h3>Incomplete Tasks</h3>
-
-
 
 <h3>Unassigned Tasks</h3>
 

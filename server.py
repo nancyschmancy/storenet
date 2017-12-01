@@ -8,13 +8,15 @@ from flask_debugtoolbar import DebugToolbarExtension
 from werkzeug.utils import secure_filename
 from model import (Employee, Store, Post, District, AssignedPost, Category, Task,
                    connect_to_db, db)
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from sqlalchemy import desc
 from faker import Faker
 from markov import trump_text
 import requests
 
-CURRENT_DATE = datetime.now()
+CURRENT_DATE = date.today()
+print CURRENT_DATE
+CURRENT_WEEKDAY = CURRENT_DATE.isoweekday()
 OW_KEY = os.environ['OPENWEATHER_API_KEY']
 UPLOAD_FOLDER = '/home/vagrant/src/storenet/static/pdf'
 UPLOAD_URL_PREFIX = '/static/pdf/'
@@ -31,6 +33,20 @@ app.jinja_env.undefined = StrictUndefined
 
 
 # ############################################################################
+
+def find_sunday(current_weekday):
+    """ Finds Sunday based on current day """
+
+    n_days_ago = 6 - current_weekday
+    sunday = datetime.now() - timedelta(days=n_days_ago)
+    monday = datetime.now() - timedelta(days=n_days_ago-1)
+    tuesday = datetime.now() - timedelta(days=n_days_ago-2)
+    wednesday = datetime.now() - timedelta(days=n_days_ago-3)
+    thursday = datetime.now() - timedelta(days=n_days_ago-4)
+    friday = datetime.now() - timedelta(days=n_days_ago-5)
+    saturday = datetime.now() - timedelta(days=n_days_ago-6)
+
+    return sunday, monday, tuesday, wednesday, thursday, friday, saturday
 
 
 def get_weather(zipcode):
@@ -52,6 +68,15 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def make_calendar():
+    """ makes blah """
+
+    weekday_num = CURRENT_DATE.isoweekday()
+    return weekday_num
+
+make_calendar()
+
+
 @app.route('/')
 def index():
     """ Homepage will display posts and tasks. """
@@ -70,12 +95,13 @@ def index():
         all_read = AssignedPost.query.count()
         store = Store.query.filter(Store.store_id == session['store_id']).one()
         weather = get_weather(store.zipcode)
+        calendar = find_sunday(CURRENT_WEEKDAY) # Returns weekday number
         return render_template('homepage.html', assigned_posts=assigned_posts,
                                incomplete_tasks=incomplete_tasks,
                                complete_tasks=complete_tasks,
                                categories=categories, all_tasks=all_tasks,
-                               all_read=all_read, current_date=CURRENT_DATE,
-                               store=store, weather=weather)
+                               all_read=all_read, current_date=datetime.now(),
+                               store=store, weather=weather, calendar=calendar)
     else:
         return render_template('login.html')
 
@@ -116,25 +142,26 @@ def display_store(store_id):
 
     store_obj = Store.query.filter(Store.store_id == store_id).one()
     weather = get_weather(store_obj.zipcode)
+    fake_sales = fake.random_int(5)
 
-    rating = {}
-    num_tasks = Task.query.filter(Task.store_id == store_id).count()
-    num_tasks_complete = Task.query.filter(Task.store_id == store_id,
+    metrics = {}
+    metrics['tasks_complete'] = Task.query.filter(Task.store_id == store_id,
                                             Task.complete == True).count()
+    metrics['tasks_incomplete'] = Task.query.filter(Task.store_id == store_id, Task.complete == False).count()
+    metrics['unassigned_tasks'] = Task.query.filter(Task.store_id == store_id, Task.emp_id == None).all()
 
-    # num_assigned_posts = AssignedPost.query.filter(AssignedPost.employee.store_id == store_id).count()
-    # num_assigned_posts_read = AssignedPost.query.filter(AssignedPost.employee.store_id == store_id,
-    #                                        AssignedPost.was_read == True).count()
-    print num_tasks, num_tasks_complete
+    metrics['num_assigned_posts_read'] = (db.session.query(AssignedPost)
+            .join(Employee, Employee.emp_id == AssignedPost.emp_id)
+            .join(Store, Store.store_id == Employee.store_id)
+            .filter(Store.store_id == '999', AssignedPost.was_read == True).count())
 
-    result = db.engine.execute("select count(*) from assigned_posts \
-                    join employees on employees.emp_id=assigned_posts.emp_id\
-            join stores on stores.store_id=employees.store_id\
-            where stores.store_id = '999'")
-
-    return render_template('view-store.html', store_obj=store_obj, weather=weather)
+    metrics['num_assigned_posts_unread'] = (db.session.query(AssignedPost)
+            .join(Employee, Employee.emp_id == AssignedPost.emp_id)
+            .join(Store, Store.store_id == Employee.store_id)
+            .filter(Store.store_id == '999', AssignedPost.was_read == False).count())
 
 
+    return render_template('view-store.html', metrics=metrics, fake_sales=fake_sales, store_obj=store_obj, weather=weather)
 
 
 @app.route('/search', methods=['GET'])
@@ -142,8 +169,8 @@ def search():
     """ Simple search in posts """
 
     search_term = request.args.get('search-term')
-    search_results = Post.query.filter((Post.title.ilike('% {} %'.format(search_term))) |
-                                       (Post.text.ilike('% {} %'.format(search_term)))).all()
+    search_results = Post.query.filter((Post.title.ilike('%{} %'.format(search_term))) |
+                                       (Post.text.ilike('%{} %'.format(search_term)))).all()
 
     return render_template('search-results.html', search_results=search_results,
                            search_term=search_term)
@@ -228,7 +255,7 @@ def preview_post():
     title = request.form.get('title-input')
     cat_id = request.form.get('category')
     text = request.form.get('post-content')
-    date = CURRENT_DATE  # Make post ID the datetime to ensure uniqueness
+    date = datetime.now()  # Make post ID the datetime to ensure uniqueness
     post_id = '{:0>4}{:0>2}{:0>2}{:0>2}{:0>2}{:0>2}'.format(date.year,
                                                             date.month,
                                                             date.day, date.hour,
@@ -242,6 +269,7 @@ def preview_post():
 
     # Determine who sees this post. This is a list of stores:
     audience = request.form.getlist('audience')
+    print audience
 
     # Add each employee from audience to assigned_post table:
     for store in audience:
@@ -344,6 +372,11 @@ def view_profile():
     employee = (Employee.query.filter(Employee.emp_id == session['emp_id'])
                 .first())
 
+    return render_template('profile.html', obj=employee)
+
+
+@app.route('/profile.json')
+def calculate_rating():
     # TODO: You can probably consolidate this into one function called by stores and whatnot
     rating = {}
     num_tasks = Task.query.filter(Task.emp_id == session['emp_id']).count()
@@ -356,8 +389,7 @@ def view_profile():
 
     rating = {'tasks': [num_tasks, num_tasks_complete], 'posts': [num_assigned_posts, num_assigned_posts_read]}
 
-    return render_template('profile.html', obj=employee,
-                           rating=rating)
+    return jsonify(rating)
 
 
 @app.route('/view-stores')

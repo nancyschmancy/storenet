@@ -43,9 +43,10 @@
         <button id='post-d05' name='audience' value='D05'> District 5</button>
         <br>
         Or select a store:
-        {% for store in stores %}
+        {% for store in stores[:-1] %}
         <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}'>{{ store.store_id }} {{ store.name }}<br>
         {% endfor %}
+        <input type='checkbox' class='store' name='audience' value='999' checked hidden>
         <br>
 
 
@@ -60,7 +61,6 @@ Action required?
 
      
 
-      </form>
 
 
         
@@ -80,62 +80,18 @@ Action required?
           <button id='edit-post-button' hidden>Edit Post</button>
           <input id='post-stuff' type='submit' value="POST!">
 
-          </form>
           
       <!-- END CONTENT -->
       </div><!--card-body-->
     </div><!--card-->
   </div><!--width class-->
 </div><!--row-->
-
-
-
-
-
-
-
-
+          </form>
 
 
 <script type="text/javascript">
     "use strict";
 
-// Preview post stuff
-$('#post-preview-button').on('click', function (evt) {
-    evt.preventDefault();
-    $('#edit-post-button').show();
-    $('#post-preview-button').hide();
-    $('#form-inputs').hide();
-    $('#post-preview').html('');
-    let postTitle = $('#title-input').val()
-    let postText = $('#post-content').val();
-    let previewTitle = $('<h4>');
-    previewTitle.html(postTitle);
-    $('#post-preview').append(previewTitle);
-    let previewText = $('<p>');
-    previewText.html(postText);
-    $('#post-preview').append(previewText);
-    $('#post-preview').show();
-});
-
-// Edit if post preview isn't good
-$('#edit-post-button').on('click', function (evt) {
-    evt.preventDefault();
-    $('#post-preview').hide();
-    $('#form-inputs').show();
-    $('#edit-post-button').hide();
-    $('#post-preview-button').show();
- 
-});
-
-// Make task assignment section appear when 'task required' is checked
-$('#task-required-checkbox').click(function () {
-  if (this.checked) {
-    $('#task-assign-section').show();
-  } else {
-    $('#task-assign-section').hide();
-  }
-});
 
 // Select all store checkboxes
 $('#post-all').on('click', function (evt) {
