@@ -29,6 +29,46 @@ app.jinja_env.undefined = StrictUndefined
 # ############################################################################
 
 
+def calculate_task_completion(complete_date, assigned_date):
+    """ Calculate difference in days HH:MM from two datetime objects. """
+
+    diff = complete_date - assigned_date
+    diff = diff.total_seconds()
+
+    days = int(diff // 86400)
+    secs_days = diff % 86400
+    hours = int(secs_days // 3600)
+    secs_hours = secs_days % 3600
+    minutes = int(secs_hours // 60)
+
+    if days > 0:
+        return '{} days and {}:{}'.format(days, hours, minutes)
+    else:
+        return '{}:{}'.format(hours, minutes)
+
+
+def avg_task_completion(task_list_obj):
+    """ Calculate task completion. """
+
+    task_speed_list = []
+    for task in task_list_obj:
+        diff = task.complete_date - task.assigned_date
+        task_speed_list.append(diff.total_seconds())
+
+    avg = sum(task_speed_list)/len(task_speed_list)
+
+    days = avg // 86400
+    secs_days = avg % 86400
+    hours = int(secs_days // 3600)
+    secs_hours = secs_days % 3600
+    minutes = int(secs_hours // 60)
+
+    if days != 0:
+        return '{} days, {}:{}'.format(days, hours, minutes)
+    else:
+        return '{}:{}'.format(hours, minutes)
+
+
 @app.route('/store/<store_id>/metrics.json')
 def get_store_metrics(store_id):
     """ Returns store metrics for data visualization & store info page """
@@ -83,17 +123,27 @@ def get_store_metrics(store_id):
 def get_calendar(weekday):
     """ Gets data for weekly task & event calendar. """
 
-    days = []
+    week_1 = []
+    week_2 = []
 
     if weekday == 7:  # Sundays is a 7 vs 1-6 for other weekdays
         weekday = 0
 
     for i in range(7):
-            day = datetime.now() - timedelta(days=weekday - i)
-            day_tasks = Task.query.filter(Task.store_id == session['store_id'], Task.deadline == cast(day, DATE)).all()
-            day_events = Event.query.filter(Event.store_id == session['store_id'], Event.date == cast(day, DATE)).all()
-            days.append((day, day_tasks, day_events))
-    return days
+        day = datetime.now() - timedelta(days=weekday - i)
+        day_tasks = Task.query.filter(Task.store_id == session['store_id'], Task.deadline == cast(day, DATE)).all()
+        day_events = Event.query.filter(Event.store_id == session['store_id'], Event.date == cast(day, DATE)).all()
+        week_1.append((day, day_tasks, day_events))
+
+    for i in range(7,14):
+        day = datetime.now() - timedelta(days=weekday - i)
+        day_tasks = Task.query.filter(Task.store_id == session['store_id'], Task.deadline == cast(day, DATE)).all()
+        day_events = Event.query.filter(Event.store_id == session['store_id'], Event.date == cast(day, DATE)).all()
+        week_2.append((day, day_tasks, day_events))
+
+    print week_1, week_2
+
+    return week_1, week_2
 
 
 def get_weather(zipcode):
@@ -122,9 +172,10 @@ def index():
 
     if session.get('emp_id'):
         # There has to be a better way to do this
+        # TODO: Bug with how the posts are ordered
         assigned_posts = (AssignedPost.query.filter
                          (AssignedPost.emp_id == session['emp_id'])
-                          .order_by(desc(AssignedPost.assigned_post_id)).limit(30))
+                          .order_by(desc(AssignedPost.assigned_post_id)).all())
         incomplete_tasks = Task.query.filter(Task.store_id == session['store_id'],
                                              Task.is_complete.is_(False)).all()
         categories = Category.query.all()
@@ -173,23 +224,6 @@ def get_read_metrics(post_id):
             ]
 
     return jsonify(data)
-
-
-@app.route('/profile.json')
-def get_employee_metrics():
-    # TODO: You can probably consolidate this into one function called by stores and whatnot
-    rating = {}
-    num_tasks = Task.query.filter(Task.emp_id == session['emp_id']).count()
-    num_tasks_complete = Task.query.filter(Task.emp_id == session['emp_id'],
-                                            Task.is_complete == True).count()
-
-    num_assigned_posts = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id']).count()
-    num_assigned_posts_read = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id'],
-                                            AssignedPost.was_read == True).count()
-
-    rating = {'tasks': [num_tasks, num_tasks_complete], 'posts': [num_assigned_posts, num_assigned_posts_read]}
-
-    return jsonify(rating)
 
 
 @app.route('/view-stores/<store_id>')
@@ -353,15 +387,16 @@ def view_post(post_id):
     if assigned_post.read_date is None:  # Prevents read date from overwriting itself
         assigned_post.read_date = datetime.now()
 
+    # FIXME - There is a bug with the two queries below!
     emps_read = (db.session.query(Employee)
                  .join(AssignedPost, AssignedPost.emp_id == Employee.emp_id)
                  .join(Store, Store.store_id == Employee.store_id)
-                 .filter(Store.store_id == session['store_id'], AssignedPost.was_read == True).all())
+                 .filter(Store.store_id == session['store_id'], AssignedPost.was_read.is_(True)).all())
 
     emps_not_read = (db.session.query(Employee)
                  .join(AssignedPost, AssignedPost.emp_id == Employee.emp_id)
                  .join(Store, Store.store_id == Employee.store_id)
-                 .filter(Store.store_id == session['store_id'], AssignedPost.was_read == False).all())
+                 .filter(Store.store_id == session['store_id'], AssignedPost.was_read.is_(False)).all())
 
     # Try to make this a method i.e. assigned_post.mark_read
 
@@ -422,14 +457,40 @@ def complete_task():
     return redirect('/')
 
 
-@app.route('/view-profile')
-def view_profile():
+@app.route('/view-profile/<emp_id>')
+def view_profile(emp_id):
     """ View user profile. """
 
-    employee = (Employee.query.filter(Employee.emp_id == session['emp_id'])
+    employee = (Employee.query.filter(Employee.emp_id == emp_id)
                 .first())
+    complete_tasks = Task.query.filter(Task.emp_id == emp_id,
+                                       Task.is_complete.is_(True)).all()
+    complete_tasks_count = len(complete_tasks)
+    # TODO: This is ugly query below, please fix later
+    oldest_date = Task.query.filter(Task.emp_id == emp_id,
+                                    Task.is_complete.is_(True)).order_by(desc(Task.complete_date)).first().complete_date
+    rating = avg_task_completion(complete_tasks)
 
-    return render_template('viewprofile.html', obj=employee)
+    return render_template('view-profile.html', obj=employee, 
+        oldest_date=oldest_date, complete_tasks_count=complete_tasks_count,
+        rating=rating)
+
+
+@app.route('/profile.json')
+def get_employee_metrics():
+    # TODO: You can probably consolidate this into one function called by stores and whatnot
+    rating = {}
+    num_tasks = Task.query.filter(Task.emp_id == session['emp_id']).count()
+    num_tasks_complete = Task.query.filter(Task.emp_id == session['emp_id'],
+                                            Task.is_complete == True).count()
+
+    num_assigned_posts = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id']).count()
+    num_assigned_posts_read = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id'],
+                                            AssignedPost.was_read == True).count()
+
+    rating = {'tasks': [num_tasks, num_tasks_complete], 'posts': [num_assigned_posts, num_assigned_posts_read]}
+
+    return jsonify(rating)
 
 
 @app.route('/view-stores')

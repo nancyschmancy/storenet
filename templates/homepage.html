@@ -24,9 +24,8 @@
     <div class="card-body">
 
       <nav class="nav nav-tabs" id="myTab" role="tablist">
-        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">New Posts</a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Profile</a>
-        <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true"><h3>New Posts</h3></a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false"><h3>Calendar</h3></a>
       </nav>
       <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
@@ -50,38 +49,69 @@
           <a href="#" class="btn btn-primary">View more posts</a>
         <!-- END NEW POSTS SECTION -->
         </div>
-        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">...</div>
-        <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
-      </div>
+        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+          <!-- BEGIN CALENDAR -->
+                <table border='1'>
+
+                <tr>
+                <td width='14%'>Sun</td>
+                <td width='14%'>Mon</td>
+                <td width='14%'>Tue</td>
+                <td width='14%'>Wed</td>
+                <td width='14%'>Thu</td>
+                <td width='14%'>Fri</td>
+                <td width='14%'>Sat</td>
+                </tr>
+
+                <tr>
+                {% for day in calendar[0] %}
+                <td width='14%'>{{ day[0].month }} {{ day[0].day }}<br>
+                  {% if day[2] %}
+                    {% for event in day[2] %}<br>
+                    <small>{{ event.desc }}</small>
+                    {% endfor %}
+                  {% endif %}
+
+                  {% if day[1] %}
+                    {% for task_due in day[1] %}<br>
+                    <small>Task due: {{ task_due.desc }}</small>
+                    {% endfor %}
+                  {% endif %}
+
+                </td>
+                {% endfor %}
+                </tr>
+
+                 <tr>
+                {% for day in calendar[1] %}
+                <td width='14%'>{{ day[0].month }} {{ day[0].day }}<br>
+                  {% if day[2] %}
+                    {% for event in day[2] %}<br>
+                    <small>{{ event.desc }}</small>
+                    {% endfor %}
+                  {% endif %}
+
+                  {% if day[1] %}
+                    {% for task_due in day[1] %}<br>
+                    <small>Task due: {{ task_due.desc }}</small>
+                    {% endfor %}
+                  {% endif %}
+
+                </td>
+                {% endfor %}
+                </tr>
+               
+
+                </table>
+          <!--end CALENDAR -->
+        </div><!--tab pane -->
+       </div>
 
               <!-- begin posts -->
 
     </div><!--card-body-->
   </div><!--card-->
-      <br>
 
-        <h3>calendar</h3>
-      <table border='1'>
-
-      <tr>
-      {% for day in calendar %}
-      <td width='14%'>{{ day[0].month }} {{ day[0].day }}<br>
-        {% if day[2] %}
-          {% for event in day[2] %}<br>
-          <small>{{ event.desc }}</small>
-          {% endfor %}
-        {% endif %}
-
-        {% if day[1] %}
-          {% for task_due in day[1] %}<br>
-          <small>Task due: {{ task_due.desc }}</small>
-          {% endfor %}
-        {% endif %}
-
-      </td>
-      {% endfor %}
-      </tr>
-      </table>
 
   </div><!--col-->
 
@@ -89,18 +119,23 @@
     <div class="card">
       <div class="card-body">
       <!-- TASKS SECTION -->
+      <h3>Task Manager</h3>
       {% if incomplete_tasks %}
-      <h3>Store Tasks</h3>
-      <form action='/complete-task' method='post'>
+      <h6 class="card-subtitle mb-2 text-muted">Incomplete Tasks 
+      <span class="badge badge-pill badge-warning">{{ incomplete_tasks|length }}</span></h6>
         {% for task in incomplete_tasks %}
-          <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
-          <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a> due in <b>{{ (task.deadline - current_date) }}</b>
-          assigned to {{ task.emp_id }}
-          <br>
+        <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a><br>
+        <small>due in <b>{{ (task.deadline - current_date) }}</b></small>
         {% endfor %}
-          <input class="btn btn-default" type="submit" value="Mark Complete">
-        </form>
+
+      {% else %}
+      Your store is up to date on all tasks.
       {% endif %}
+
+
+      {% for task in metrics['unassigned_tasks'] %}
+        {{ task.desc }}
+      {% endfor %}
 
       <div id="content"></div>
 
@@ -122,6 +157,8 @@ View post by category:
 function showWeather() {
 
     let url = '/posts/20171204015438/read-compliance.json';
+    let formData = {"zipcode": $("#zipcode-field").val()};
+
 
     $.get(url, function (results) {
         console.log(results);

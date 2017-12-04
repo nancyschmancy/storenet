@@ -15,7 +15,7 @@
       <!-- BEGIN CONTENT-->
       <form action='/insert-post' method='post' id='post-stuff-box' enctype='multipart/form-data'>
         Title
-        <input class="form-control form-control-lg" type="text" placeholder="Title"name="title-input" required value='{{ fake_title }}'>
+        <input class="form-control form-control-lg" type="text" placeholder="Title"name="title-input" required>
         Post Category:
           <select class="form-control form-control-md" name='category' required>
           <option selected disabled value="">Select a Category</option>
@@ -24,7 +24,7 @@
           {% endfor %}
           </select>
         Content
-        <textarea class="form-control form-control-md" id='post-content' name='post-content' rows='20' required>{{ fake_text }}</textarea>
+        <textarea class="form-control form-control-md" id='post-content' name='post-content' rows='20' required></textarea>
 
 </div></div></div>        
         <div class="col-xs-12 col-md-3 col-lg-3">
@@ -69,7 +69,7 @@ Action required?
          Task required? <input id='task-required-checkbox' type='checkbox' name='has_task'>
 
         <div id='task-assign-section'>
-          Task item: <input id='task-desc-input' class='text-input' type='text/css' name='task_item' value='{{ fake_title }}' maxlength='50'>
+          Task item: <input class="form-control form-control-md" id='task-desc-input' class='text-input' type='text/css' name='task_item' maxlength='50'>
           Deadline: <input id='task-deadline-input' type='date' name='deadline'>
         </div>   
 

@@ -1,192 +1,202 @@
-{% extends 'base.html' %}
+  {% extends 'base.html' %}
 
-{% block title %}Welcome to Storenet{% endblock %}
+  {% block title %}Storenet | {{ post.title }}{% endblock %}
 
-{% block body %}
-<div class='container-fluid'>
-  <div class="row">
-    <div class="col-xs-12 col-md-6 col-lg-9">
-      <div class="panel panel-default">
-        <!-- POSTS GO HERE -->
-            <div class="panel-heading">
-              <h3 class="panel-title">{{ post.title }}</h3>
-              <small>Read by 
-                {% for emp in emps_read %}
-                {{ emp.fname }}
-                {% endfor %}
-              </small>
-              <small>Not yet Read by 
-                {% for emp in emps_not_read %}
-                {{ emp.fname }}
-                {% endfor %}
-              </small>
-            </div>
-          <div class="panel-body">
-            {% if post.pdf_url %}
-              There is an attachment associated with this post: <a href="{{ post.pdf_url }}">{{ post.pdf_url}}</a>
-              {% else %}
-              no pdf
-              {% endif %}
-
+  {% block body %}
+  <br>
+  <div class='container-fluid'>
+    <div class="row">
+      <div class="col-xs-12 col-md-6 col-lg-6 offset-1">
+        <div class="card">
+          <div class="card-body">
+            <!-- POSTS GO HERE -->
+            <h3>Post</h3>
+            <h4 class="card-title">{{ post.title }}</h4>
+            <h6 class="card-subtitle mb-2 text-muted">Posted on {{ post.date.strftime('%a, %m.%d.%y') }} | Filed under {{ post.category.name }}</h6>
+            <div class='pdf'>
+             {% if post.pdf_url %}
+                  There is an attachment associated with this post: <a href="{{ post.pdf_url }}">{{ post.pdf_url}}</a>
+                  {% else %}
+                  no pdf
+                  {% endif %}
+                </div>
+            <br>
             <p>{{ post.text }}</p>
+            <!-- END POSTS SECTION -->
           </div>
-        <!-- END POSTS SECTION -->
-      </div>
-    </div>
-    <div class="col-xs-12 col-md-6 col-lg-3">
-      <div class="panel panel-default">
-        <div class="panel-body">
-        <!-- TASKS SECTION -->
-        {% if post.tasks %}
-          This task is due on <b>{{ task.deadline }}</b>. Status: 
-          {% if task.is_complete == False %}
-              <span class="badge badge-danger">INCOMPLETE</span>
+        </div>
+      </div><!--col-->
+      <div class="col-xs-12 col-md-6 col-lg-4">
+          <!-- TASKS SECTION -->
+          <div class='card'><div class='card-body'>
+          {% if post.tasks %}
+            <h3>Tasks</h3>
+            This task is due on <b>{{ task.deadline }}</b>. Status: 
+            {% if task.is_complete == False %}
+                <span class="badge badge-danger">INCOMPLETE</span>
+
+            {% else %}
+                Completed on {{ task.complete_date }}
+            {% endif %}
+
+            {% if task.emp_id == session['emp_id'] %}
+              This post is assigned to you.
+            {% elif task.emp_id %}
+                This task is already assigned to {{ task.employee.fname }}.
+            {% else %}
+                Assign this task to an associate:
+                <form action='/assign-task' method='post'>
+                  <select name='assignee' required>
+                    <option selected disabled value="">Select an Employee</option>
+                    {% for employee in task.store.employees %}
+                    <option value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}</option>
+                    {% endfor %}
+                  </select>
+                    <input type='hidden' name='post_id' value='{{ post.post_id }}'>
+                    <input type='submit'>
+                </form>
+            {% endif %}
 
           {% else %}
-              Completed on {{ task.complete_date }}
+              <small>No post is informational only. There is no task associated with tihs post. However, you must share the information with your fellow managers.</small>
           {% endif %}
-          <br>
+          </div></div><!--card and body -->
+         <!-- END TASK SECTION -->
+        <div class="card">
+          <div class="card-body">
+            <h3>Who has read this post?</h3>
+                  <small>
+                    {% for emp in emps_read %}
+                    <input type='checkbox' checked disabled>{{ emp.fname }}<br>
+                    {% endfor %}
+                    {% for emp in emps_not_read %}
+                    <input type='checkbox' disabled>{{ emp.fname }}<br>
+                    {% endfor %}
+                  </small>
+          </div></div><!--card body and card--> 
+               
 
-          {% if task.emp_id == session['emp_id'] %}
-            This post is assigned to you.
-          {% elif task.emp_id %}
-              This task is already assigned to {{ task.employee.fname }}.
-          {% else %}
-              Assign this task to an associate:
-              <form action='/assign-task' method='post'>
-                <select name='assignee' required>
-                  <option selected disabled value="">Select an Employee</option>
-                  {% for employee in task.store.employees %}
-                  <option value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}</option>
-                  {% endfor %}
-                  <input type='hidden' name='post_id' value='{{ post.post_id }}'>
-                  <input type='submit'>
-              </form>
-          {% endif %}
-
-        {% else %}
-            No post is informational only. There is no task associated with tihs post. However, you must share the information with your fellow managers.
-        {% endif %}
-        <!-- END TASK SECTION -->
-        <!-- DATA VIZ -->
-        <h3>Post Views (all company)</h3>
-         <svg id='chart'></svg>
-          <h3>Task completion (all_company)</h3>
-         <svg id='tchart'></svg>
-        <!-- END DATA VIZ -->
+          <!-- DATA VIZ -->
+          <h3>Post Views (all company)</h3>
+           <svg id='chart'></svg>
+            <h3>Task completion (all_company)</h3>
+           <svg id='tchart'></svg>
+          <!-- END DATA VIZ -->
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+
+  </div><!--row-->
+</div><!--container-->
+
+
+  <!-- D3 Data Visualization here-->
+  <script type="text/javascript">
+      'use strict';
+
+    d3.json('/posts/{{ post.post_id }}/read-compliance.json', function (data) {
+
+      let chartWidth = 300,
+          barHeight = 30;
+
+      let scale = d3.scale.linear()
+          .domain([0, (d3.max(data, (d) => d.max))])
+          .range([0, chartWidth]);
+
+      let color = d3.scale.linear()
+          .domain([0, (d3.max(data, (d) => d.max))])
+          .range(['orange', 'steelblue']);
+
+      let chart = d3.select('#chart')
+          .attr('width', chartWidth)
+          .attr('height', barHeight * data.length * 2.5)
+
+      let axis = d3.svg.axis()
+          .ticks(3)
+          .scale(scale);
+
+      let bar = chart.selectAll('g')
+          .data(data)
+          .enter().append('g')
+          .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
+
+      bar.append('rect')
+          .attr('width', chartWidth)
+          .attr('height', barHeight-1 )
+          .attr('fill', 'gray');
+
+      bar.append('rect')
+          .attr('width', 0)
+          .transition()
+          .duration(1000)
+          .attr('width', (d) => scale(d.value))
+          .attr('height', barHeight - 1)
+          .attr('fill', (d) => color(d.value));
+
+      bar.append('text')
+          .attr('x', (d) => scale(d.value) - 3)
+          .attr('y', barHeight / 2)
+          .attr('dy', '.2em')
+          .text((d) => d.percent + '%');
+
+      chart.append('g')
+          .attr('transform', 'translate(0, 50)')
+
+      });
+
+
+   d3.json('/posts/{{ post.post_id }}/task-completion.json', function (data) {
+
+      let chartWidth = 300,
+          barHeight = 30;
+
+      let scale = d3.scale.linear()
+          .domain([0, (d3.max(data, (d) => d.max))])
+          .range([0, chartWidth]);
+
+      let color = d3.scale.linear()
+          .domain([0, (d3.max(data, (d) => d.max))])
+          .range(['orange', 'steelblue']);
+
+      let chart = d3.select('#tchart')
+          .attr('width', chartWidth)
+          .attr('height', barHeight * data.length * 2.5)
+          .attr('fill', 'red');
+
+      let axis = d3.svg.axis()
+          .ticks(3)
+          .scale(scale);
+
+      let bar = chart.selectAll('g')
+          .data(data)
+          .enter().append('g')
+          .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
+
+      bar.append('rect')
+          .attr('width', 0)
+          .transition()
+          .duration(1000)
+          .attr('width', (d) => scale(d.value))
+          .attr('height', barHeight - 1)
+          .attr('fill', (d) => color(d.value));
+
+      bar.append('text')
+          .attr('x', (d) => scale(d.value) - 3)
+          .attr('y', barHeight * 1.5)
+          .attr('dy', '2px')
+          .text((d) => d.name +' - ' + d.percent + '%');
+
+      chart.append('g')
+          .attr('transform', 'translate(0, 50)')
+
+      });
+
+
+  </script>
 
 
 
-<!-- D3 Data Visualization here-->
-<script type="text/javascript">
-    'use strict';
 
-  d3.json('/posts/{{ post.post_id }}/read-compliance.json', function (data) {
-
-    let chartWidth = 300,
-        barHeight = 30;
-
-    let scale = d3.scale.linear()
-        .domain([0, (d3.max(data, (d) => d.max))])
-        .range([0, chartWidth]);
-
-    let color = d3.scale.linear()
-        .domain([0, (d3.max(data, (d) => d.max))])
-        .range(['orange', 'steelblue']);
-
-    let chart = d3.select('#chart')
-        .attr('width', chartWidth)
-        .attr('height', barHeight * data.length * 2.5)
-
-    let axis = d3.svg.axis()
-        .ticks(3)
-        .scale(scale);
-
-    let bar = chart.selectAll('g')
-        .data(data)
-        .enter().append('g')
-        .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
-
-    bar.append('rect')
-        .attr('width', chartWidth)
-        .attr('height', barHeight-1 )
-        .attr('fill', 'gray');
-
-    bar.append('rect')
-        .attr('width', 0)
-        .transition()
-        .duration(1000)
-        .attr('width', (d) => scale(d.value))
-        .attr('height', barHeight - 1)
-        .attr('fill', (d) => color(d.value));
-
-    bar.append('text')
-        .attr('x', (d) => scale(d.value) - 3)
-        .attr('y', barHeight / 2)
-        .attr('dy', '.2em')
-        .text((d) => d.percent + '%');
-
-    chart.append('g')
-        .attr('transform', 'translate(0, 50)')
-
-    });
-
-
- d3.json('/posts/{{ post.post_id }}/task-completion.json', function (data) {
-
-    let chartWidth = 300,
-        barHeight = 30;
-
-    let scale = d3.scale.linear()
-        .domain([0, (d3.max(data, (d) => d.max))])
-        .range([0, chartWidth]);
-
-    let color = d3.scale.linear()
-        .domain([0, (d3.max(data, (d) => d.max))])
-        .range(['orange', 'steelblue']);
-
-    let chart = d3.select('#tchart')
-        .attr('width', chartWidth)
-        .attr('height', barHeight * data.length * 2.5)
-        .attr('fill', 'red');
-
-    let axis = d3.svg.axis()
-        .ticks(3)
-        .scale(scale);
-
-    let bar = chart.selectAll('g')
-        .data(data)
-        .enter().append('g')
-        .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
-
-    bar.append('rect')
-        .attr('width', 0)
-        .transition()
-        .duration(1000)
-        .attr('width', (d) => scale(d.value))
-        .attr('height', barHeight - 1)
-        .attr('fill', (d) => color(d.value));
-
-    bar.append('text')
-        .attr('x', (d) => scale(d.value) - 3)
-        .attr('y', barHeight * 1.5)
-        .attr('dy', '2px')
-        .text((d) => d.name +' - ' + d.percent + '%');
-
-    chart.append('g')
-        .attr('transform', 'translate(0, 50)')
-
-    });
-
-
-</script>
-
-
-
-
-{% endblock %}
+  {% endblock %}

@@ -4,16 +4,16 @@ body {
 
 div {
     font-family: 'Open Sans', 'sans-serif';
-    font-size: 18px;
+    font-size: 16px;
 }
 
 h3 {
     font-family: 'Montserrat', 'sans-serif' !important;
     color: steelblue !important;
     font-weight: 900;
-    font-size: 16px !important;
+    font-size: 17px !important;
     text-transform: uppercase;
-    border-bottom: #c0c0c0 1px solid;
+    font-weight: bold !important;
 }
 
 .navbar {
@@ -24,7 +24,7 @@ h3 {
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
   font-size: 24px !important;
-  color: steelblue !important;
+  color: orange !important;
 }
 
 #chart, #tchart text {
@@ -32,4 +32,10 @@ h3 {
   font: 10px 'Open Sans';
   font-weight: 200;
   text-anchor: end !important;
+}
+
+.pdf {
+  font: 12px 'Open Sans';
+  font-weight: 200;
+  text-align: left;
 }

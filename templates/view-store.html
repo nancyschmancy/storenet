@@ -29,7 +29,7 @@
 
     <h3>Employee List</h3>
     {% for employee in store_obj.employees|sort(attribute='pos_id') %}
-    {{ employee.fname }} {{ employee.lname }}, {{ employee.position.title }}<br>
+    <a href='/view-profile/{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }}</a>, {{ employee.position.title }}<br>
 
     {% endfor %}
 

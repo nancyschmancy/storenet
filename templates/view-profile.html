@@ -17,6 +17,11 @@
     <li>{{ obj }}</li>
 </ul>
 
+This associate has completed
+<b>{{ complete_tasks_count }}</b> tasks
+since <b>{{ oldest_date }}<b/>. 
+<br>Average completion time: {{ rating }}
+
 {% if obj.pos_id == "99-HQ" %}
     <p>Admin information goes here</p>
     <a href="post">Post some stuff here</a>
