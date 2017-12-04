@@ -3,43 +3,41 @@
 {% block title %}edit this{% endblock %}
 
 {% block body %}
+<br>
 
-<ol>
-<li>% of read posts</li>
-<li>% task completion</li>
-<li>list of unassigned tasks</li>
-</ol>
+<div class="col-xs-12 col-md-12 col-lg-12">
+  <div class='card'><div class='card-body'>
+    <b>Today's Weather</b><br>
+    <img src="{{ weather.icon }}"> {{ weather.desc }}</img>
+    
 
-     <b>Today's Weather</b><br>
-        <img src="{{ weather.icon }}"> {{ weather.desc }}
-        </div>
+    <h3> metrics</h3>
+    {{ metrics }}
+    <h3> unassigned_tasks</h3>
+    {% for task in metrics['unassigned_tasks'] %}
+    <a href="/view-post/{{ task.post_id }}">{{ task.desc }}</a><br>
+    {% endfor %}
 
-<h3> metrics</h3>
-{{ metrics }}
-<h3> unassigned_tasks</h3>
-{% for task in metrics['unassigned_tasks'] %}
-<a href="/view-post/{{ task.post_id }}">{{ task.task_item}}</a><br>
-{% endfor %}
-
-<h3> Latest Sales</h3>
-${{fake_sales}}
+    <h3> Latest Sales</h3>
+    ${{fake_sales}}
 
 
-<h3>Store Information</h3>
-{{ store_obj.name }}<br>
-{{ store_obj.address }}<br>
-{{ store_obj.phone }}<br>
+    <h3>Store Information</h3>
+    {{ store_obj.name }}<br>
+    {{ store_obj.address }}<br>
+    {{ store_obj.phone }}<br>
 
-<h3>Employee List</h3>
-{% for employee in store_obj.employees|sort(attribute='pos_id') %}
+    <h3>Employee List</h3>
+    {% for employee in store_obj.employees|sort(attribute='pos_id') %}
     {{ employee.fname }} {{ employee.lname }}, {{ employee.position.title }}<br>
 
-{% endfor %}
+    {% endfor %}
 
-<h3>Incomplete Tasks</h3>
+    <h3>Incomplete Tasks</h3>
 
-<h3>Unassigned Tasks</h3>
+    <h3>Unassigned Tasks</h3>
 
-
+  </div></div><!--card--><!--card-body-->
+</div><!--col-->
 {% endblock %}
                         

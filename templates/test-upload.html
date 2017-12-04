@@ -1,7 +1,137 @@
-  <!doctype html>
-    <title>Upload new File</title>
-    <h1>Upload new File</h1>
-    <form action='/uploadfile' method=post enctype=multipart/form-data>
-      <p><input type=file name=file>
-         <input type=submit value=Upload>
-    </form>
+<html>
+<head>
+    <title></title>
+    <script src="https://d3js.org/d3.v3.min.js"></script> 
+
+</head>
+<body>
+
+
+<script type="text/javascript">
+
+var width = 960,
+    height = 500; // adjust for height of input bar div
+
+var color = d3.scale.category20();
+
+// draw and append the container
+var svg = d3.select("body").append("svg")
+  .attr("width", width).attr("height", height);
+
+// set the thickness of the inner and outer radii
+var min = Math.min(width, height);
+var oRadius = min / 2 * 0.9;
+var iRadius = min / 2 * 0.85;
+
+// construct default pie laoyut
+var pie = d3.layout.pie().value(function(d){
+ return d; 
+}).sort(null);
+
+// construct arc generator
+var arc = d3.svg.arc()
+  .outerRadius(oRadius)
+  .innerRadius(iRadius);
+
+// creates the pie chart container
+var g = svg.append('g')
+  .attr('transform', 'translate(300,250)')
+
+g.append('text').attr('text-anchor', 'middle').text("asdasdasdas")
+// generate random data
+var data = [0,100];
+
+// enter data and draw pie chart
+var path = g.datum(data).selectAll("path")
+  .data(pie)
+  .enter().append("path")
+    .attr("class","piechart")
+    .attr("fill", function(d,i){ return color(i); })
+    .attr("d", arc)
+    .each(function(d){ 
+      this._current = d; 
+    })
+
+function render(){
+  // generate new random data
+  data = makeData(2);
+  // add transition to new path
+  g.datum(data).selectAll("path").data(pie).transition().duration(1000).attrTween("d", arcTween)
+
+  // add any new paths
+  g.datum(data).selectAll("path")
+    .data(pie)
+  .enter().append("path")
+    .attr("class","piechart")
+    .attr("fill", function(d,i){ return color(i); })
+    .attr("d", arc)
+    .each(function(d){ this._current = d; })
+
+  // remove data not being used
+  g.datum(data).selectAll("path")
+    .data(pie).exit().remove();
+}
+
+render();
+
+function makeData(size){
+  return d3.range(size).map(function(item){
+   return Math.random()*100;
+  });
+};
+
+// Store the displayed angles in _current.
+// Then, interpolate from _current to the new angles.
+// During the transition, _current is updated in-place by d3.interpolate.
+function arcTween(a) {
+  var i = d3.interpolate(this._current, a);
+  this._current = i(0);
+  return function(t) {
+    return arc(i(t));
+  };
+}
+</script>
+
+<script type="text/javascript">
+    'use strict';
+
+  d3.json('http://localhost:5000/posts/20171202055058/metrics.json', function(data) {
+    let r = 100;
+
+    let color = d3.scale.ordinal()
+        .range(['blue', 'gray']);
+
+    let canvas = d3.select('#read-chart').append('svg')
+        .attr('width', 200)
+        .attr('height', 200)
+        .append('g')
+        .attr('transform', 'translate(100, 100)');
+
+    // Create the circle
+    let arc = d3.svg.arc() 
+        .innerRadius(0)
+        .outerRadius(r);
+
+    // Create the paths
+    let pie = d3.layout.pie()
+        .value((d) => d.count);
+    
+    let wedgies = canvas.selectAll('arc')
+        .data(pie(data.value))
+        .enter()
+            .append('g')
+            .attr('class', 'arc');
+    
+    wedgies.append('path')
+        .attr('d', arc)
+        .attr('fill', (d) => color(d.data.count))
+        .text((d) => d.value);
+    
+    wedgies.append('text')
+        .text((d) =>    d.data.count);                
+});
+
+</script>
+
+</body>
+</html>

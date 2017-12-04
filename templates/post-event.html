@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Make a Post{% endblock %}
+
+{% block body %}
+<form action='/post-event' method='post'>
+  Event
+  <input class="form-control form-control-lg" type="text" placeholder="Event"name='event-input' maxlength='25'>
+  Date: <input id='event-date-input' type='date' name='event-date-input' required>
+  <br>
+  <button id='post-all'>Select All Stores</button>
+  Or select a store:<br>
+  {% for store in stores[:-1] %}
+  <input type='checkbox' class='store' name='stores' value='{{ store.store_id }}'>{{ store.store_id }} {{ store.name }}<br>
+  {% endfor %}
+  <input type='checkbox' class='store' name='stores' value='999' checked hidden>
+  <input type='submit'>
+
+<script type="text/javascript">
+    "use strict";
+
+
+// Select all store checkboxes
+$('#post-all').on('click', function (evt) {
+    evt.preventDefault();
+    if ($('#post-all').html() === 'Uncheck All Stores') {
+        $(':checked').prop('checked', false);
+        $('#post-all').html('Select All Stores');
+    } else if ($('#post-all').html() === 'Select All Stores') {
+        $('.store').prop('checked', true);
+        $('#post-all').html('Uncheck All Stores');
+    }
+});
+
+</script>
+
+{% endblock %}

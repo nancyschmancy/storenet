@@ -1,31 +1,35 @@
 body {
-    background-color: #d0d0d0 !important;
+    background-color: #e0e0e0 !important;
 }
 
 div {
-    font-family: 'Barlow', 'sans-serif';
-    letter-spacing: .05em;
+    font-family: 'Open Sans', 'sans-serif';
+    font-size: 18px;
 }
 
 h3 {
-    font-family: 'Passion One', 'sans-serif' !important;
-    color: gray !important;
+    font-family: 'Montserrat', 'sans-serif' !important;
+    color: steelblue !important;
+    font-weight: 900;
+    font-size: 16px !important;
+    text-transform: uppercase;
+    border-bottom: #c0c0c0 1px solid;
 }
 
-#post-list td {
-    border: 1px solid #c0c0c0;
+.navbar {
+  border-top: 5px solid steelblue;
 }
 
-#flash {
-    color: red;
-    border: 1px solid red;
+.navbar-brand {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 24px !important;
+  color: steelblue !important;
 }
 
-#unread {
-    color: red;
-    font: 10px bold;
-}
-
-.container {
-    padding: 100px;
+#chart, #tchart text {
+  fill: white !important;
+  font: 10px 'Open Sans';
+  font-weight: 200;
+  text-anchor: end !important;
 }

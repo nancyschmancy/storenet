@@ -13,11 +13,12 @@
       </div>
       <div class="card-body">
       <!-- BEGIN CONTENT-->
-      <form action='/preview-post' method='post' id='post-stuff-box' enctype='multipart/form-data'>
+      <form action='/insert-post' method='post' id='post-stuff-box' enctype='multipart/form-data'>
         Title
         <input class="form-control form-control-lg" type="text" placeholder="Title"name="title-input" required value='{{ fake_title }}'>
         Post Category:
-          <select class="form-control form-control-md" name='category'>
+          <select class="form-control form-control-md" name='category' required>
+          <option selected disabled value="">Select a Category</option>
           {% for category in categories: %}
           <option value='{{ category.cat_id }}'>{{ category.name }}</option>
           {% endfor %}
@@ -68,7 +69,7 @@ Action required?
          Task required? <input id='task-required-checkbox' type='checkbox' name='has_task'>
 
         <div id='task-assign-section'>
-          Task item: <input id='task-desc-input' class='text-input' type='text/css' name='task_item' value='{{ fake_title }}'>
+          Task item: <input id='task-desc-input' class='text-input' type='text/css' name='task_item' value='{{ fake_title }}' maxlength='50'>
           Deadline: <input id='task-deadline-input' type='date' name='deadline'>
         </div>   
 

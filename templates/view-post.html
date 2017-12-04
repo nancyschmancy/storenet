@@ -15,6 +15,11 @@
                 {{ emp.fname }}
                 {% endfor %}
               </small>
+              <small>Not yet Read by 
+                {% for emp in emps_not_read %}
+                {{ emp.fname }}
+                {% endfor %}
+              </small>
             </div>
           <div class="panel-body">
             {% if post.pdf_url %}
@@ -34,35 +39,40 @@
         <!-- TASKS SECTION -->
         {% if post.tasks %}
           This task is due on <b>{{ task.deadline }}</b>. Status: 
-          {% if task.complete == False %}
-              <span id='flash'>INCOMPLETE.</span>
+          {% if task.is_complete == False %}
+              <span class="badge badge-danger">INCOMPLETE</span>
+
           {% else %}
               Completed on {{ task.complete_date }}
           {% endif %}
           <br>
 
-          {% if task.emp_id %} <!-- QUESTION: Again, why is this a list? -->
+          {% if task.emp_id == session['emp_id'] %}
+            This post is assigned to you.
+          {% elif task.emp_id %}
               This task is already assigned to {{ task.employee.fname }}.
           {% else %}
               Assign this task to an associate:
               <form action='/assign-task' method='post'>
+                <select name='assignee' required>
+                  <option selected disabled value="">Select an Employee</option>
                   {% for employee in task.store.employees %}
-                  <input type='radio' name='assignee' value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}<br>
+                  <option value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}</option>
                   {% endfor %}
                   <input type='hidden' name='post_id' value='{{ post.post_id }}'>
                   <input type='submit'>
               </form>
-        {% endif %}
+          {% endif %}
 
         {% else %}
-            No task is required on this. Go get a coffee.
+            No post is informational only. There is no task associated with tihs post. However, you must share the information with your fellow managers.
         {% endif %}
         <!-- END TASK SECTION -->
         <!-- DATA VIZ -->
         <h3>Post Views (all company)</h3>
-          <div id='read-chart'></div>
+         <svg id='chart'></svg>
           <h3>Task completion (all_company)</h3>
-          <div id='task-chart'></div>
+         <svg id='tchart'></svg>
         <!-- END DATA VIZ -->
         </div>
       </div>
@@ -76,76 +86,107 @@
 <script type="text/javascript">
     'use strict';
 
-  d3.json('/read-{{ post.post_id }}.json', function(data) {
-    let r = 100;
+  d3.json('/posts/{{ post.post_id }}/read-compliance.json', function (data) {
 
-    let color = d3.scale.ordinal()
-        .range(['blue', 'gray']);
+    let chartWidth = 300,
+        barHeight = 30;
 
-    let canvas = d3.select('#read-chart').append('svg')
-        .attr('width', 200)
-        .attr('height', 200)
-        .append('g')
-        .attr('transform', 'translate(100, 100)');
+    let scale = d3.scale.linear()
+        .domain([0, (d3.max(data, (d) => d.max))])
+        .range([0, chartWidth]);
 
-    // Create the circle
-    let arc = d3.svg.arc() 
-        .innerRadius(0)
-        .outerRadius(r);
+    let color = d3.scale.linear()
+        .domain([0, (d3.max(data, (d) => d.max))])
+        .range(['orange', 'steelblue']);
 
-    // Create the paths
-    let pie = d3.layout.pie()
-        .value((d) => d.count);
+    let chart = d3.select('#chart')
+        .attr('width', chartWidth)
+        .attr('height', barHeight * data.length * 2.5)
 
-    let wedgies = canvas.selectAll('arc')
-        .data(pie(data))
-        .enter()
-            .append('g')
-            .attr('class', 'arc');
+    let axis = d3.svg.axis()
+        .ticks(3)
+        .scale(scale);
 
-    wedgies.append('path')
-        .attr('d', arc)
-        .attr('fill', (d) => color(d.data.count))
-        .text((d) => d.data.label);
+    let bar = chart.selectAll('g')
+        .data(data)
+        .enter().append('g')
+        .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
 
-    wedgies.append('text')
-        .text((d) =>    d.data.count);                
-});
+    bar.append('rect')
+        .attr('width', chartWidth)
+        .attr('height', barHeight-1 )
+        .attr('fill', 'gray');
 
-  d3.json('/task-{{ post.post_id }}.json', function(data) {
-    let r = 100;
+    bar.append('rect')
+        .attr('width', 0)
+        .transition()
+        .duration(1000)
+        .attr('width', (d) => scale(d.value))
+        .attr('height', barHeight - 1)
+        .attr('fill', (d) => color(d.value));
 
-    let color = d3.scale.ordinal()
-        .range(['gray', 'green']);
+    bar.append('text')
+        .attr('x', (d) => scale(d.value) - 3)
+        .attr('y', barHeight / 2)
+        .attr('dy', '.2em')
+        .text((d) => d.percent + '%');
 
-    let canvas = d3.select('#task-chart').append('svg')
-        .attr('width', 200)
-        .attr('height', 200)
-        .append('g')
-        .attr('transform', 'translate(100, 100)');
+    chart.append('g')
+        .attr('transform', 'translate(0, 50)')
 
-    // Create the circle
-    let arc = d3.svg.arc() 
-        .innerRadius(0)
-        .outerRadius(r);
+    });
 
-    // Create the paths
-    let pie = d3.layout.pie()
-        .value((d) => d.count);
 
-    let wedgies = canvas.selectAll('arc')
-        .data(pie(data))
-        .enter()
-            .append('g')
-            .attr('class', 'arc');
+ d3.json('/posts/{{ post.post_id }}/task-completion.json', function (data) {
 
-    wedgies.append('path')
-        .attr('d', arc)
-        .attr('fill', (d) => color(d.data.count));
+    let chartWidth = 300,
+        barHeight = 30;
 
-    wedgies.append('text')
-        .text((d) => d.data.count);               
-});
+    let scale = d3.scale.linear()
+        .domain([0, (d3.max(data, (d) => d.max))])
+        .range([0, chartWidth]);
+
+    let color = d3.scale.linear()
+        .domain([0, (d3.max(data, (d) => d.max))])
+        .range(['orange', 'steelblue']);
+
+    let chart = d3.select('#tchart')
+        .attr('width', chartWidth)
+        .attr('height', barHeight * data.length * 2.5)
+        .attr('fill', 'red');
+
+    let axis = d3.svg.axis()
+        .ticks(3)
+        .scale(scale);
+
+    let bar = chart.selectAll('g')
+        .data(data)
+        .enter().append('g')
+        .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
+
+    bar.append('rect')
+        .attr('width', 0)
+        .transition()
+        .duration(1000)
+        .attr('width', (d) => scale(d.value))
+        .attr('height', barHeight - 1)
+        .attr('fill', (d) => color(d.value));
+
+    bar.append('text')
+        .attr('x', (d) => scale(d.value) - 3)
+        .attr('y', barHeight * 1.5)
+        .attr('dy', '2px')
+        .text((d) => d.name +' - ' + d.percent + '%');
+
+    chart.append('g')
+        .attr('transform', 'translate(0, 50)')
+
+    });
+
+
 </script>
+
+
+
 
 {% endblock %}

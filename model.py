@@ -132,14 +132,14 @@ class AssignedPost(db.Model):
     def __repr__(self):
         """ Displays info about read assigned_post """
 
-        return "<WAS {} READ? {} {}>".format(self.post_id, self.employee.emp_id,
+        return "<Was {} read? {} {}>".format(self.post_id, self.employee.emp_id,
                                              self.was_read)
 
 
 class Task(db.Model):
     """ Tracks task item. """
 
-    __tablename__ = 'task'
+    __tablename__ = 'tasks'
 
     task_id = db.Column(db.Integer, primary_key=True, nullable=False,
                         autoincrement=True)
@@ -149,10 +149,10 @@ class Task(db.Model):
                          nullable=False)
     emp_id = db.Column(db.String(5), db.ForeignKey('employees.emp_id'),
                        nullable=True)
-    task_item = db.Column(db.String(100), nullable=False)
+    desc = db.Column(db.String(50), nullable=False)
     assigned_date = db.Column(db.DateTime, nullable=True)
     deadline = db.Column(db.DateTime, nullable=True)
-    complete = db.Column(db.Boolean, nullable=False)
+    is_complete = db.Column(db.Boolean, nullable=False)
     complete_date = db.Column(db.DateTime, nullable=True)
 
     post = db.relationship('Post', backref='tasks')
@@ -162,17 +162,34 @@ class Task(db.Model):
     def __repr__(self):
         """ This displays information about for each task. """
 
-        return '<Task on {}>'.format(self.post_id)
+        return '<Task for post {}>'.format(self.post_id)
+
+
+class Event(db.Model):
+    """ Event class """
+
+    __tablename__ = 'events'
+
+    event_id = db.Column(db.Integer, primary_key=True, nullable=False,
+                         autoincrement=True)
+    desc = db.Column(db.String(25), primary_key=True, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    store_id = db.Column(db.String(3), db.ForeignKey('stores.store_id'),
+                         nullable=False)
+
+    def __repr__(self):
+        """ This displays information about for each task. """
+
+        return '<Event {}>'.format(self.desc)
 
 
 ##############################################################################
-# Helper functions - NTS: find out what these do
+# Helper functions
 
 
 def connect_to_db(app):
-    """Connect the database to our Flask app."""
+    """Connect the database to Flask app."""
 
-    # Configure to use our PstgreSQL database
     app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///storenet'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     db.app = app
@@ -180,9 +197,6 @@ def connect_to_db(app):
 
 
 if __name__ == '__main__':
-    # As a convenience, if we run this module interactively, it will leave
-    # you in a state of being able to work with the database directly.
-
     from server import app
     connect_to_db(app)
     print 'You are connected to the database:'

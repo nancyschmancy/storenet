@@ -1,4 +1,4 @@
-""" I'm going to use this file to generate FAKE data! YAY FAKER! """
+""" File to generate database information """
 
 # from sqlalchemy import func
 from faker import Faker
@@ -6,8 +6,8 @@ from model import Employee, Store, Position, District, Category, connect_to_db, 
 from server import app
 from random import choice
 
-
 fake = Faker()
+
 
 def make_districts():
     """ Let's make some districts! """
@@ -22,7 +22,7 @@ def make_districts():
                      'D03': 'Midwest',
                      'D04': 'Northeast',
                      'D05': 'Southeast',
-                     'D99': 'Corporate HQ'}  # QUESTION: How to do this?
+                     'D99': 'Corporate HQ'}
 
     for district in district_dict:
         district_id = district
@@ -42,10 +42,6 @@ def make_stores():
 
     # Since I like to run this file over and over again:
     Store.query.delete()
-
-    # Create random endings for mall
-    # mall_suffixes = ['Plaza', 'Premium Outlet', 'Mall', 'Centre',
-    #                  'Shopping Center']
 
     for row in open('misc/seed_stores.txt'):
         row = row.rstrip()
@@ -104,13 +100,14 @@ def make_emps():
     Employee.query.delete()
 
     # QUESTION: Hm, how do I solve for duplicates, though? *scratches head*
-    for emp in range(300):
+    for emp in range(1,301):
         emp_id = "{:0>5}".format(emp)  # emp_id is 5 digits long
         fname = fake.first_name()
         lname = fake.last_name()
         ssn = fake.ssn()
-        password = 'a'  # '{}{}'.format((ssn[-4:]), (lname[0]))
+        password = 'jjjj'  # '{}{}'.format((ssn[-4:]), (lname[0]))
         store_id = get_random_store()
+
         if mgmt_position[store_id] == []:
             pos_id = '03-SS'
         else:
@@ -175,8 +172,8 @@ def make_district_managers():
                    lname='Cohan', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
-    d05 = Employee(emp_id='55555', fname='Ariana',
-                   lname='Patterson', ssn=fake.ssn(),
+    d05 = Employee(emp_id='55555', fname='Kourtney',
+                   lname='Young', ssn=fake.ssn(),
                    password='f', store_id='999', pos_id='10-DM')
 
     db.session.add_all([d01, d02, d03, d04, d05])
@@ -184,16 +181,15 @@ def make_district_managers():
 
 
 def add_nancy():
-    """ Adds me & corp to the employee table. """
+    """ Adds me & corp to the employee & store tables """
 
     corp_store = Store(store_id='999',
                        name='Corporate Headquarters',
                        address='400 Valley Drive',
                        city='Brisbane',
                        state='CA',
-                       zipcode='94005', phone='(415) 555-1234', 
+                       zipcode='94005', phone='(415) 555-1234',
                        district_id='D99')
-
 
     nancy = Employee(emp_id='09332', fname='Nancy',
                      lname='Reyes', ssn='123-45-6789',
@@ -207,13 +203,11 @@ def add_nancy():
 # Helper Functions
 
 
-# QUESTION: Ask about encapsulatuion. This function is outside of class.
 def get_random_store():
     """ Helper function to generate a random store. Will be assigned to
     employee in make_emps function. """
 
     all_stores = Store.query.all()
-
     random_store = choice(all_stores).store_id
 
     return random_store
@@ -224,7 +218,7 @@ def get_random_district():
     random store in make_store function. """
 
     #  Need to exclude Corporate
-    all_districts = District.query.filter( db.not_(District.district_id.in_(['D99']))).all()
+    all_districts = District.query.filter(db.not_(District.district_id.in_(['D99']))).all()
 
     random_district = choice(all_districts).district_id
 
