@@ -6,7 +6,7 @@
   <br>
   <div class='container-fluid'>
     <div class="row">
-      <div class="col-xs-12 col-md-6 col-lg-6 offset-1">
+      <div class="col-xs-12 col-md-6 col-lg-7 offset-1">
         <div class="card">
           <div class="card-body">
             <!-- POSTS GO HERE -->
@@ -26,7 +26,7 @@
           </div>
         </div>
       </div><!--col-->
-      <div class="col-xs-12 col-md-6 col-lg-4">
+      <div class="col-xs-12 col-md-6 col-lg-3">
           <!-- TASKS SECTION -->
           <div class='card'><div class='card-body'>
           {% if post.tasks %}
@@ -78,9 +78,13 @@
 
           <!-- DATA VIZ -->
           <h3>Post Views (all company)</h3>
-           <svg id='chart'></svg>
+          <a href='/logout'>Log Out</a>
+                <div id="content"></div>
+
+           <svg id='read-chart'></svg>
             <h3>Task completion (all_company)</h3>
-           <svg id='tchart'></svg>
+           <svg id='task-chart'></svg>
+           <svg id='dis'></svg>
           <!-- END DATA VIZ -->
           </div>
         </div>
@@ -92,24 +96,105 @@
 </div><!--container-->
 
 
-  <!-- D3 Data Visualization here-->
-  <script type="text/javascript">
-      'use strict';
+<!-- D3 Data Visualization here-->
+<script type="text/javascript">
+  'use strict';
 
-    d3.json('/posts/{{ post.post_id }}/read-compliance.json', function (data) {
+function createRadialChart(url) {
+  d3.json(url, function (results) {
 
-      let chartWidth = 300,
-          barHeight = 30;
+  let color = d3.scale.ordinal()
+    .range(['orange', 'steelblue']);
+
+  let radius = 50;
+  let border = 3;
+  let startPercent = 0;
+  let endPercent = results.data.percent/100;
+  let formatPercent = d3.format('.0%');
+  let canvas = radius * 2 + 10;
+
+  let count = Math.abs((endPercent - startPercent) / 0.01);
+  let step = endPercent < startPercent ? -0.01 : 0.01;
+
+  let arc = d3.svg.arc()
+    .startAngle(0)
+    .innerRadius(radius)
+    .outerRadius(radius - border);
+
+  let parent = d3.select(results.div);
+
+  let svg = parent.append('svg')
+    .attr('width', canvas)
+    .attr('height', canvas);
+
+  let defs = svg.append('defs');
+
+  let g = svg.append('g')
+    .attr('transform', 'translate(' + canvas / 2 + ',' + canvas / 2 + ')');
+
+  let innerCircle = g.append('g')
+    .attr('class', 'progress-meter');
+
+  innerCircle.append('path')
+    .attr('fill', '#c0c0c0')
+    .attr('d', arc.endAngle(Math.PI * 2));
+
+  let foreground = innerCircle.append('path')
+    .attr('fill', color)
+    .attr('stroke', color)
+    .attr('stroke-width', 5)
+
+  let front = innerCircle.append('path')
+    .attr('class', 'foreground')
+    .attr('fill', color())
+
+  let text = innerCircle.append('text')
+    .attr('fill', 'black')
+    .attr('text-anchor', 'middle')
+    .attr('dy', '.35em')
+
+  function updateProgress(progress) {
+    foreground.attr('d', arc.endAngle(Math.PI * 2 * progress));
+    front.attr('d', arc.endAngle(Math.PI * 2 * progress));
+    text.text(formatPercent(progress));
+  }
+
+  let progress = startPercent;
+
+  (function loops() {
+    updateProgress(progress);
+
+    if (count > 0) {
+        count--;
+        progress += step;
+        setTimeout(loops, 10);
+    }
+})()});
+};
+
+createRadialChart('/posts/{{ post.post_id }}/read-compliance.json')
+createRadialChart('/posts/{{ post.post_id }}/task-completion.json')
+
+
+function createChart(url) {
+
+  d3.json(url, function (results) {
+      
+      let data = results
+      let formatPercent = d3.format('.0%');
+
+      let chartWidth = 500,
+          barHeight = 75;
 
       let scale = d3.scale.linear()
-          .domain([0, (d3.max(data, (d) => d.max))])
+          .domain([0, 100])
           .range([0, chartWidth]);
 
       let color = d3.scale.linear()
-          .domain([0, (d3.max(data, (d) => d.max))])
+          .domain([0, 100])
           .range(['orange', 'steelblue']);
 
-      let chart = d3.select('#chart')
+      let chart = d3.select('#dis')
           .attr('width', chartWidth)
           .attr('height', barHeight * data.length * 2.5)
 
@@ -123,80 +208,28 @@
           .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
 
       bar.append('rect')
-          .attr('width', chartWidth)
-          .attr('height', barHeight-1 )
-          .attr('fill', 'gray');
-
-      bar.append('rect')
           .attr('width', 0)
           .transition()
           .duration(1000)
-          .attr('width', (d) => scale(d.value))
-          .attr('height', barHeight - 1)
-          .attr('fill', (d) => color(d.value));
+          .attr('width', (d) => scale(d.percent))
+          .attr('height', barHeight - 3)
+          .attr('fill', (d) => color(d.percent));
 
       bar.append('text')
-          .attr('x', (d) => scale(d.value) - 3)
+          .attr('x', (d) => scale(d.percent) - 3)
           .attr('y', barHeight / 2)
           .attr('dy', '.2em')
-          .text((d) => d.percent + '%');
+          .text((d) => d.district + ' ' + formatPercent(d.percent/100));
 
       chart.append('g')
           .attr('transform', 'translate(0, 50)')
+        });
+}
 
-      });
+createChart('/districts/read-compliance.json');
+createChart('/districts/task-completion.json')
 
-
-   d3.json('/posts/{{ post.post_id }}/task-completion.json', function (data) {
-
-      let chartWidth = 300,
-          barHeight = 30;
-
-      let scale = d3.scale.linear()
-          .domain([0, (d3.max(data, (d) => d.max))])
-          .range([0, chartWidth]);
-
-      let color = d3.scale.linear()
-          .domain([0, (d3.max(data, (d) => d.max))])
-          .range(['orange', 'steelblue']);
-
-      let chart = d3.select('#tchart')
-          .attr('width', chartWidth)
-          .attr('height', barHeight * data.length * 2.5)
-          .attr('fill', 'red');
-
-      let axis = d3.svg.axis()
-          .ticks(3)
-          .scale(scale);
-
-      let bar = chart.selectAll('g')
-          .data(data)
-          .enter().append('g')
-          .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
-
-      bar.append('rect')
-          .attr('width', 0)
-          .transition()
-          .duration(1000)
-          .attr('width', (d) => scale(d.value))
-          .attr('height', barHeight - 1)
-          .attr('fill', (d) => color(d.value));
-
-      bar.append('text')
-          .attr('x', (d) => scale(d.value) - 3)
-          .attr('y', barHeight * 1.5)
-          .attr('dy', '2px')
-          .text((d) => d.name +' - ' + d.percent + '%');
-
-      chart.append('g')
-          .attr('transform', 'translate(0, 50)')
-
-      });
+</script>
 
 
-  </script>
-
-
-
-
-  {% endblock %}
+{% endblock %}

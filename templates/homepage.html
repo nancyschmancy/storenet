@@ -10,9 +10,9 @@
     <div class="card">
       <div class="card-body">
       <h3>Store Dashboard</h3>
-      Store {{ session['store_id'] }} - {{ store.name }}<br><br>
+      <small>Store {{ session['store_id'] }} - {{ store.name }}</small><br><br>
       <b>Today's Sales Projections</b><br>
-      $1500<br><br>
+      <span class='sales'>$1500</span><br><br>
       <b>Current Weather for {{ weather.place }}</b><br>
       <img src="{{ weather.icon }}"> {{ weather.desc }}
       </div> <!--card-body-->
@@ -51,30 +51,31 @@
         </div>
         <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
           <!-- BEGIN CALENDAR -->
-                <table border='1'>
+          <br>
+                <table border=1>
 
                 <tr>
-                <td width='14%'>Sun</td>
-                <td width='14%'>Mon</td>
-                <td width='14%'>Tue</td>
-                <td width='14%'>Wed</td>
-                <td width='14%'>Thu</td>
-                <td width='14%'>Fri</td>
-                <td width='14%'>Sat</td>
+                <td width='14%' class='table-head'>Sun</td>
+                <td width='14%' class='table-head'>Mon</td>
+                <td width='14%' class='table-head'>Tue</td>
+                <td width='14%' class='table-head'>Wed</td>
+                <td width='14%' class='table-head'>Thu</td>
+                <td width='14%' class='table-head'>Fri</td>
+                <td width='14%' class='table-head'>Sat</td>
                 </tr>
 
                 <tr>
                 {% for day in calendar[0] %}
-                <td width='14%'>{{ day[0].month }} {{ day[0].day }}<br>
+                <td width='14%'>{{ day[0].strftime('%A') }} {{ day[0].month }} {{ day[0].day }}<br>
                   {% if day[2] %}
                     {% for event in day[2] %}<br>
-                    <small>{{ event.desc }}</small>
+                    <div class='calendar-event'>{{ event.desc }}</div>
                     {% endfor %}
                   {% endif %}
 
                   {% if day[1] %}
                     {% for task_due in day[1] %}<br>
-                    <small>Task due: {{ task_due.desc }}</small>
+                    <div class='calendar-task'>Task due: {{ task_due.desc }}</div>
                     {% endfor %}
                   {% endif %}
 
@@ -84,16 +85,16 @@
 
                  <tr>
                 {% for day in calendar[1] %}
-                <td width='14%'>{{ day[0].month }} {{ day[0].day }}<br>
+                <td width='14%' >{{ day[0].month }} {{ day[0].day }}<br>
                   {% if day[2] %}
                     {% for event in day[2] %}<br>
-                    <small>{{ event.desc }}</small>
+                    <div class='calendar-event'>{{ event.desc }}</div>
                     {% endfor %}
                   {% endif %}
 
                   {% if day[1] %}
                     {% for task_due in day[1] %}<br>
-                    <small>Task due: {{ task_due.desc }}</small>
+                    <div calss='calendar-task'>Task due: {{ task_due.desc }}</div>
                     {% endfor %}
                   {% endif %}
 
@@ -121,17 +122,23 @@
       <!-- TASKS SECTION -->
       <h3>Task Manager</h3>
       {% if incomplete_tasks %}
-      <h6 class="card-subtitle mb-2 text-muted">Incomplete Tasks 
+      <h6 class="card-subtitle mb-2 text-muted">Incomplete Tasks for Store {{ session['store_id'] }}
       <span class="badge badge-pill badge-warning">{{ incomplete_tasks|length }}</span></h6>
         {% for task in incomplete_tasks %}
         <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a><br>
-        <small>due in <b>{{ (task.deadline - current_date) }}</b></small>
+        <small>
+        {% if (task.deadline - current_date).days < 0 %}
+        <span style='color: red'>overdue by {{ -(task.deadline - current_date).days }} days</span>
+        {% else %}
+        due in {{ (task.deadline - current_date).days }} days
+        {% endif %}
+        </b></small><br>
         {% endfor %}
 
       {% else %}
       Your store is up to date on all tasks.
       {% endif %}
-
+      <br><br>
 
       {% for task in metrics['unassigned_tasks'] %}
         {{ task.desc }}
@@ -147,103 +154,10 @@
 
 View post by category:
   {% for category in categories: %}
-    <a href='/{{ category.cat_id }}'>{{ category.name }}</a> |
+    <a href='/categories/{{ category.cat_id }}'>{{ category.name }}</a> |
   {% endfor %}
 
 
-<script type="text/javascript">
-  'use strict';
 
-function showWeather() {
-
-    let url = '/posts/20171204015438/read-compliance.json';
-    let formData = {"zipcode": $("#zipcode-field").val()};
-
-
-    $.get(url, function (results) {
-        console.log(results);
-    });
-}
-showWeather()
-
-  d3.json('/posts/20171204015438/read-compliance.json', function (data) {
-
-let color = d3.scale.ordinal()
-  .range(['orange', 'steelblue']);
-
-var radius = 75;
-var border = 5;
-var padding = 30;
-var startPercent = 0;
-var endPercent = .5;
-
-var formatPercent = d3.format('.0%');
-var boxSize = (radius + padding) * 2;
-
-var count = Math.abs((endPercent - startPercent) / 0.01);
-var step = endPercent < startPercent ? -0.01 : 0.01;
-
-var arc = d3.svg.arc()
-    .startAngle(0)
-    .innerRadius(radius)
-    .outerRadius(radius - border);
-
-var parent = d3.select('div#content');
-
-var svg = parent.append('svg')
-    .attr('width', boxSize)
-    .attr('height', boxSize);
-
-var defs = svg.append('defs');
-
-var g = svg.append('g')
-    .attr('transform', 'translate(' + boxSize / 2 + ',' + boxSize / 2 + ')');
-
-var innerCircle = g.append('g')
-    .attr('class', 'progress-meter');
-
-innerCircle.append('path')
-    .attr('class', 'background')
-    .attr('fill', '#ccc')
-    .attr('fill-opacity', 0.5)
-    .attr('d', arc.endAngle(Math.PI * 2));
-
-var foreground = innerCircle.append('path')
-    .attr('class', 'foreground')
-    .attr('fill', color)
-    .attr('fill-opacity', 1)
-    .attr('stroke', color)
-    .attr('stroke-width', 5)
-    .attr('stroke-opacity', 1);
-
-var front = innerCircle.append('path')
-    .attr('class', 'foreground')
-    .attr('fill', color)
-    .attr('fill-opacity', 1);
-
-var numberText = innerCircle.append('text')
-    .attr('fill', 'black')
-    .attr('text-anchor', 'middle')
-    .attr('dy', '.35em')
-
-function updateProgress(progress) {
-    foreground.attr('d', arc.endAngle(Math.PI * 2 * progress));
-    front.attr('d', arc.endAngle(Math.PI * 2 * progress));
-    numberText.text(formatPercent(progress));
-}
-
-var progress = startPercent;
-
-(function loops() {
-    updateProgress(progress);
-
-    if (count > 0) {
-        count--;
-        progress += step;
-        setTimeout(loops, 10);
-    }
-})()});
-
-</script>
 
 {% endblock %}
