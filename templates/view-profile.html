@@ -1,11 +1,10 @@
 {% extends 'base.html' %}
 
-{% block title %}User Profile{% endblock %}
+{% block title %}Storenet | User Profile{% endblock %}
 
 {% block body %}
 
 <h3>Details for {{ obj.fname }} {{ obj.lname}}</h3>
-
 
 <ul>
     <li>{{ obj.fname }} {{ obj.lname }}</li>
@@ -22,61 +21,73 @@ This associate has completed
 since <b>{{ oldest_date }}<b/>. 
 <br>Average completion time: {{ rating }}
 
-{% if obj.pos_id == "99-HQ" %}
-    <p>Admin information goes here</p>
-    <a href="post">Post some stuff here</a>
-{% endif %}
 
-<div id='chart'></div>
+{% if incomplete_tasks %}
+          <form action='/complete-task' method='post'>
+        {% for task in incomplete_tasks %}
+          <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
+          <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a> due in <b>{{ (task.deadline - current_date) }}</b>
+          assigned to {{ task.emp_id }}
+          <br>
+        {% endfor %}
+          <input class="btn btn-default" type="submit" value="Mark Complete">
+        </form>
+      {% endif %}
+<br>
+task thing<br>
+
+
+<svg id='read-chart'></svg>
+<br>
+<svg id='task-chart'></svg>
+
 
 <script type="text/javascript">
 
-function createGraph(dataset, div) {
+function createBarGraph(url) {
 
-  let width = 480;
-  let height = 360;
+  d3.json(url, function (results) {
 
-  let scale = d3.scale.linear()
-    .domain([0, 200])
-    .range([0, width]);
+    let data = results.data
+    console.log(results)
 
-  let colorScale = d3.scale.linear()
-    .domain([0, 200])
-    .range(['red', 'green']);
+    let width = 420;
+    let barHeight = 50;
 
-  let axis = d3.svg.axis()
-    .ticks(5)
-    .scale(scale);
+    let scale = d3.scale.linear()
+      .domain([0, d3.max(data, (d) => d.max)])
+      .range([0, width]);
 
-  let canvas = d3.select('#chart')
-    .append('svg')
-    .attr('width', width)
-    .attr('height', height)
-    .append('g')
-    .attr('transform', 'translate(20, 0)')
-    
-  let bars = canvas.selectAll('rect')
-    .data(dataset) // This binds data to the invisible rects we created
-    .enter()
-      .append('rect')
-      .attr('width', function(d) { return scale(d); }) // This is kind of like a loop
-      .attr('height', 25)
-      .attr('y', function(d, i) { return i * 40 ; })
-      .attr('fill', function(d) { return colorScale(d) });
+    let color = d3.scale.linear()
+      .domain([0, d3.max(data, (d) => d.max)])
+      .range(['orange', 'steelblue']);
 
-  canvas.append('g')
-    .attr('transform', 'translate(0, 300)')
-    .call(axis);
-}
+    let chart = d3.select(results.div)
+      .attr("width", width)
+      .attr("height", barHeight);
 
-createGraph([20,40], 'chart')
+    let bar = chart.selectAll("g")
+      .data(data)
+      .enter().append("g")
+      .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
 
-$.get('/profile.json', createGraph(result.posts, 'chart'  ));
+    bar.append("rect")
+      .attr('width', (d) => scale(d.value))
+      .attr("height", barHeight - 1)
+      .attr('fill', (d) => color(d.value));
 
+    bar.append("text")
+      .attr("x", function(d) { return scale(d.value) - 3; })
+      .attr("y", barHeight / 2)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.percent; });
 
+  });
+  };
+
+createBarGraph('/view-profile/{{ obj.emp_id }}/task-completion.json');
+createBarGraph('/view-profile/{{ obj.emp_id }}/read-compliance.json')
 
 </script>
-
-
 
 {% endblock %}

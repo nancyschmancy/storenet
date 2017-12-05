@@ -13,6 +13,8 @@ from sqlalchemy import desc, cast, DATE
 from faker import Faker
 from markov import trump_text
 import requests
+from random import randint
+
 
 OW_KEY = os.environ['OPENWEATHER_API_KEY']
 UPLOAD_FOLDER = '/home/vagrant/src/storenet/static/pdf'
@@ -41,16 +43,20 @@ def index():
                           .order_by(desc(AssignedPost.assigned_post_id)).all())
         incomplete_tasks = Task.query.filter(Task.store_id == session['store_id'],
                                              Task.is_complete.is_(False)).all()
+        emp_incomplete_tasks = Task.query.filter(Task.emp_id == session['emp_id'],
+                                                 Task.is_complete.is_(False)).all()
         categories = Category.query.all()
         store = Store.query.filter(Store.store_id == session['store_id']).one()
         weather = get_weather(store.zipcode)
         metrics = get_store_metrics(session['store_id'])
         calendar = get_calendar(datetime.now().isoweekday())  # Returns weekday number
+        
+        print assigned_posts
         return render_template('homepage.html', assigned_posts=assigned_posts,
                                incomplete_tasks=incomplete_tasks,
                                categories=categories, current_date=datetime.now(),
                                store=store, weather=weather, calendar=calendar,
-                               metrics=metrics)
+                               metrics=metrics, emp_incomplete_tasks=emp_incomplete_tasks)
     else:
         return render_template('login.html')
 
@@ -105,7 +111,7 @@ def create_post():
     """ Admin interface for creating a post. """
 
     # This is for the list of stores
-    stores = Store.query.all()
+    stores = Store.query.order_by(Store.store_id).all()
     categories = Category.query.all()
 
     # Fake content for fun & giggles
@@ -149,7 +155,7 @@ def insert_post():
 
     # Determine who sees this post. This is a list of stores.
     audience = request.form.getlist('audience')
-
+    print audience
     # Add each employee from audience to assigned_post table:
     for store in audience:
         # Sales associates (03-SS) are excluded from seeing posts unless
@@ -175,7 +181,7 @@ def insert_post():
 
     db.session.commit()
 
-    flash("ERMAHGERD you posted something!")
+    flash("Post created.")
     return redirect('/')
 
 
@@ -213,7 +219,7 @@ def view_post(post_id):
         task = Task.query.filter(Task.post_id == post_id,
                                  Task.store == store).one()
     else:
-        task = 'chuck norris'  # I have to send something to Jinja regardless
+        task = None
 
     db.session.commit()
     print session['emp_id']
@@ -304,6 +310,13 @@ def display_by_cat(cat_id):
     return render_template('view-category.html', posts_by_cat=posts_by_cat)
 
 
+@app.route('/district-metrics/')
+def display_district_metrics():
+    """ Displays posts by category. """
+
+    return render_template('district-metrics.html')
+
+
 @app.route('/view-stores')
 def view_stores():
     """ Displays a directory of all stores. """
@@ -344,16 +357,22 @@ def view_profile(emp_id):
     complete_tasks = Task.query.filter(Task.emp_id == emp_id,
                                        Task.is_complete.is_(True)).all()
     complete_tasks_count = len(complete_tasks)
+    incomplete_tasks = Task.query.filter(Task.emp_id == emp_id,
+                                         Task.is_complete.is_(False)).all()
 
     # FIXME: This is ugly query below, please fix later
-    oldest_date = Task.query.filter(Task.emp_id == emp_id,
-                                    Task.is_complete.is_(True)).order_by(desc(Task.complete_date)).first().complete_date
-    rating = avg_task_completion(complete_tasks)
+    if complete_tasks:
+        oldest_date = Task.query.filter(Task.emp_id == emp_id,
+                                        Task.is_complete.is_(True)).order_by(desc(Task.complete_date)).first().complete_date
+        rating = avg_task_completion(complete_tasks)
+    else:
+        rating = []
+        oldest_date = None
 
-    return render_template('view-profile.html', obj=employee,
+    return render_template('view-profile.html', obj=employee, current_date=datetime.now(),
                            oldest_date=oldest_date,
                            complete_tasks_count=complete_tasks_count,
-                           rating=rating)
+                           rating=rating, incomplete_tasks=incomplete_tasks)
 
 
 ##############################################################################
@@ -361,50 +380,92 @@ def view_profile(emp_id):
 ##############################################################################
 
 
-@app.route('/profile.json')
-def get_employee_metrics():
-    # TODO: You can probably consolidate this into one function called by stores and whatnot
-    rating = {}
-    num_tasks = Task.query.filter(Task.emp_id == session['emp_id']).count()
-    num_tasks_complete = Task.query.filter(Task.emp_id == session['emp_id'],
+@app.route('/view-profile/<emp_id>/task-completion.json')
+def get_employee_task_metrics(emp_id):
+
+    num_tasks = Task.query.filter(Task.emp_id == emp_id).count()
+    num_tasks_complete = Task.query.filter(Task.emp_id == emp_id,
                                            Task.is_complete.is_(True)).count()
+
+    data = [{'name': 'task compliance',
+            'value': num_tasks_complete,
+            'max': num_tasks,
+            'percent': (float(num_tasks_complete) / num_tasks) * 100
+             }]
+
+    task_dict = {'data': data,
+                 'div': '#task-chart'
+                 }
+
+    return jsonify(task_dict)
+
+
+@app.route('/view-profile/<emp_id>/read-compliance.json')
+def get_employee_read_metrics(emp_id):
 
     num_assigned_posts = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id']).count()
     num_assigned_posts_read = AssignedPost.query.filter(AssignedPost.emp_id == session['emp_id'],
                                                         AssignedPost.was_read.is_(True)).count()
 
-    rating = {'tasks': [num_tasks, num_tasks_complete],
-              'posts': [num_assigned_posts, num_assigned_posts_read]
-              }
+    data = [{'name': 'task compliance',
+            'value': num_assigned_posts_read,
+            'max': num_assigned_posts,
+            'percent': (float(num_assigned_posts_read) / num_assigned_posts) * 100
+             }]
 
-    return jsonify(rating)
+    read_dict = {'data': data,
+                 'div': '#read-chart'
+                 }
+
+    return jsonify(read_dict)
 
 
 @app.route('/store/<store_id>/metrics.json')
-def get_store_metrics(store_id):
+def get_store_task_completion(store_id):
     """ Returns store metrics for data visualization & store info page """
 
-    metrics = {}
-    metrics['tasks_complete'] = Task.query.filter(Task.store_id == store_id,
+    tasks_complete = Task.query.filter(Task.store_id == store_id,
                                                   Task.is_complete.is_(True)).all()
-    metrics['tasks_complete_count'] = Task.query.filter(Task.store_id == store_id,
+    all_tasks = Task.query.filter(Task.store_id == store_id,
                                                         Task.is_complete.is_(True)).count()
-    metrics['tasks_incomplete'] = Task.query.filter(Task.store_id == store_id,
-                                                    Task.is_complete.is_(False)).count()
-    metrics['unassigned_tasks'] = Task.query.filter(Task.store_id == store_id,
-                                                    Task.emp_id.is_(None)).all()
+    data = [{'name': 'task compliance',
+            'value': tasks_complete,
+            'max': all_tasks,
+            'percent': (float(tasks_complete) / all_tasks) * 100
+             }]
 
-    metrics['posts_read'] = (db.session.query(AssignedPost)
-                             .join(Employee, Employee.emp_id == AssignedPost.emp_id)
-                             .join(Store, Store.store_id == Employee.store_id)
-                             .filter(Store.store_id == store_id, AssignedPost.was_read.is_(True)).count())
+    task_dict = {'data': data,
+                 'div': '#task-chart'
+                 }
 
-    metrics['posts_unread'] = (db.session.query(AssignedPost)
-                               .join(Employee, Employee.emp_id == AssignedPost.emp_id)
-                               .join(Store, Store.store_id == Employee.store_id)
-                               .filter(Store.store_id == store_id, AssignedPost.was_read.is_(False)).count())
+    return jsonify(task_dict)
 
-    return metrics
+
+@app.route('/store/<store_id>/metrics.json')
+def get_store_read_compliance(store_id):
+    """ Returns store metrics for data visualization & store info page """
+
+    posts_read = (db.session.query(AssignedPost)
+                  .join(Employee, Employee.emp_id == AssignedPost.emp_id)
+                  .join(Store, Store.store_id == Employee.store_id)
+                  .filter(Store.store_id == store_id, AssignedPost.was_read.is_(True)).count())
+
+    all_posts = (db.session.query(AssignedPost)
+                 .join(Employee, Employee.emp_id == AssignedPost.emp_id)
+                 .join(Store, Store.store_id == Employee.store_id)
+                 .filter(Store.store_id == store_id).count())
+
+    data = [{'name': 'read compliance',
+            'value': posts_read,
+            'max': all_posts,
+            'percent': (float(posts_read) / all_posts) * 100
+             }]
+
+    read_dict = {'data': data,
+                 'div': '#read-chart'
+                 }
+
+    return jsonify(read_dict)
 
 
 @app.route('/districts/task-completion.json')
@@ -427,7 +488,9 @@ def get_district_task_metrics():
         data_dict['percent'] = (float(complete_tasks)/all_tasks)*100
         data.append(data_dict)
 
-    return jsonify(data)
+    task_dict = {'data': data, 'div': '#task-chart'}
+
+    return jsonify(task_dict)
 
 
 @app.route('/districts/read-compliance.json')
@@ -454,7 +517,9 @@ def get_district_read_metrics():
         data_dict['percent'] = (float(read_assigned_posts)/all_assigned_posts)*100
         data.append(data_dict)
 
-    return jsonify(data)
+    read_dict = {'data': data, 'div': '#read-chart'}
+
+    return jsonify(read_dict)
 
 
 @app.route('/posts/<post_id>/task-completion.json')
@@ -499,6 +564,37 @@ def get_read_metrics(post_id):
 ##############################################################################
 # HELPER FUNCTIONS
 ##############################################################################
+
+
+@app.route('/store/<store_id>/metrics.json')
+def get_store_metrics(store_id):
+    """ Returns store metrics for data visualization & store info page """
+
+    metrics = {}
+    metrics['tasks_complete'] = Task.query.filter(Task.store_id == store_id,
+                                                  Task.is_complete.is_(True)).all()
+    metrics['tasks_complete_count'] = Task.query.filter(Task.store_id == store_id,
+                                                        Task.is_complete.is_(True)).count()
+    metrics['tasks_incomplete'] = Task.query.filter(Task.store_id == store_id,
+                                                    Task.is_complete.is_(False)).count()
+    metrics['unassigned_tasks'] = Task.query.filter(Task.store_id == store_id,
+                                                    Task.emp_id.is_(None)).all()
+
+    metrics['posts_read'] = (db.session.query(AssignedPost)
+                             .join(Employee, Employee.emp_id == AssignedPost.emp_id)
+                             .join(Store, Store.store_id == Employee.store_id)
+                             .filter(Store.store_id == store_id, AssignedPost.was_read.is_(True)).count())
+
+    metrics['posts_unread'] = (db.session.query(AssignedPost)
+                               .join(Employee, Employee.emp_id == AssignedPost.emp_id)
+                               .join(Store, Store.store_id == Employee.store_id)
+                               .filter(Store.store_id == store_id, AssignedPost.was_read.is_(False)).count())
+    metrics['fake_proj'] = randint(1500, 9999)
+    metrics['fake_sales'] = randint(100, 9999)
+
+    # find only unassigned tasks, exclusive of incomplete
+
+    return metrics
 
 
 def calculate_time_diff(date1, date2):

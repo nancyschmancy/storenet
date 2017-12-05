@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}edit this{% endblock %}
+{% block title %}Storenet | View Store {% endblock %}
 
 {% block body %}
 <br>
@@ -39,5 +39,57 @@
 
   </div></div><!--card--><!--card-body-->
 </div><!--col-->
+
+
+
+
+
+<script type="text/javascript">
+
+function createBarGraph(url) {
+
+  d3.json(url, function (results) {
+
+    let data = results.data
+    console.log(results)
+
+    let width = 420;
+    let barHeight = 50;
+
+    let scale = d3.scale.linear()
+      .domain([0, d3.max(data, (d) => d.max)])
+      .range([0, width]);
+
+    let color = d3.scale.linear()
+      .domain([0, d3.max(data, (d) => d.max)])
+      .range(['orange', 'steelblue']);
+
+    let chart = d3.select(results.div)
+      .attr("width", width)
+      .attr("height", barHeight);
+
+    let bar = chart.selectAll("g")
+      .data(data)
+      .enter().append("g")
+      .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+    bar.append("rect")
+      .attr('width', (d) => scale(d.value))
+      .attr("height", barHeight - 1)
+      .attr('fill', (d) => color(d.value));
+
+    bar.append("text")
+      .attr("x", function(d) { return scale(d.value) - 3; })
+      .attr("y", barHeight / 2)
+      .attr("dy", ".35em")
+      .text(function(d) { return d.percent; });
+
+  });
+  };
+
+createBarGraph('/store/{{ store_obj.store_id }}/task-completion.json');
+createBarGraph('/view-profile/{{ store_obj.store_id }}/read-compliance.json')
+
+</script>
 {% endblock %}
                         

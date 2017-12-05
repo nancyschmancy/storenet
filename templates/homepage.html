@@ -12,7 +12,9 @@
       <h3>Store Dashboard</h3>
       <small>Store {{ session['store_id'] }} - {{ store.name }}</small><br><br>
       <b>Today's Sales Projections</b><br>
-      <span class='sales'>$1500</span><br><br>
+      <span class='sales'>${{ metrics['fake_proj'] }}</span><br><br>
+      <b>Current Sales</b><br>
+      <span class='sales'>${{ metrics['fake_sales'] }}</span><br><br>
       <b>Current Weather for {{ weather.place }}</b><br>
       <img src="{{ weather.icon }}"> {{ weather.desc }}
       </div> <!--card-body-->
@@ -117,9 +119,28 @@
   </div><!--col-->
 
   <div class="col-xs-12 col-md-3 col-lg-3">
+      <!-- TASKS SECTION -->
+{% if emp_incomplete_tasks %}
+    <div class="card">
+      <div class="card-body" style='background-color: yellow'>
+<h3>YOUR TAKS</h3>
+          <form action='/complete-task' method='post'>
+        {% for task in emp_incomplete_tasks %}
+          <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
+          <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a> due in <b>{{ (task.deadline - current_date) }}</b>
+          assigned to {{ task.emp_id }}
+          <br>
+        {% endfor %}
+          <input class="btn btn-default" type="submit" value="Mark Complete">
+        </form>
+</div></div><!--card-->
+<br>
+  {% endif %}
+
+
     <div class="card">
       <div class="card-body">
-      <!-- TASKS SECTION -->
+
       <h3>Task Manager</h3>
       {% if incomplete_tasks %}
       <h6 class="card-subtitle mb-2 text-muted">Incomplete Tasks for Store {{ session['store_id'] }}

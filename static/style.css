@@ -47,7 +47,7 @@ td {
 .sales {
   font-family: 'Montserrat', sans-serif !important;
   font-size: 36px !important;
-  color: orange !important;
+  color: #c0c0c0 !important;
 }
 
 td > .calendar-task {
