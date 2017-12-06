@@ -3,19 +3,44 @@
 {% block title %}Make a Post{% endblock %}
 
 {% block body %}
+<br>
+  <div class='container-fluid'>
+    <div class="row">
+      <div class="col-xs-12 col-md-4 col-lg-4 offset-2">
+        <div class="card">
+                        <div class="card-header">
+
+      <h3>Create an Event</h3>
+      </div>
+          <div class="card-body">
+ 
 <form action='/post-event' method='post'>
   Event
-  <input class="form-control form-control-lg" type="text" placeholder="Event"name='event-input' maxlength='25'>
-  Date: <input id='event-date-input' type='date' name='event-date-input' required>
-  <br>
-  <button id='post-all'>Select All Stores</button>
-  Or select a store:<br>
-  {% for store in stores[:-1] %}
-  <input type='checkbox' class='store' name='stores' value='{{ store.store_id }}'>{{ store.store_id }} {{ store.name }}<br>
-  {% endfor %}
-  <input type='checkbox' class='store' name='stores' value='999' checked hidden>
-  <input type='submit'>
+  <input class="form-control form-control-lg" type="text" placeholder="Event" name='event-input' maxlength='25'>
+  Date: <input class="form-control form-control-lg" id='event-date-input' type='date' name='event-date-input' required>
+  
+  </div></div></div>
 
+  <div class="col-xs-12 col-md-4 col-lg-4">
+        <div class="card">
+             <div class="card-header">
+      <h3>Select Stores</h3>
+      </div>
+
+      <div class="card-body">
+
+        <button id='post-all' type="button" class="btn btn-outline-secondary btn-sm" >Select All Stores</button><br><br>
+        
+        Or select an individual store:<br>
+        {% for store in stores[:-1] %}
+        <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}'> {{ store.store_id }} {{ store.name }}<br>
+        {% endfor %}
+        <input type='checkbox' class='store' name='audience' value='999' checked hidden><br>
+                  <input type="submit" class="btn btn-secondary btn-lg" id='post-stuff' value="Post Event">
+</form>
+
+
+</div>  </div></div></div>
 <script type="text/javascript">
     "use strict";
 

@@ -1,21 +1,41 @@
 body {
-    background-color: #e0e0e0 !important;
+    background-color: #eeeeee !important;
 }
 
 div {
-    font-family: 'Open Sans', 'sans-serif';
-    font-size: 16px;
+    font-family: 'Roboto', 'sans-serif';
+    font-weight: 300;
+    font-size: 18px;
 }
 
-h3 {
+.post {
+  line-height: 35px;  
+
+}
+
+.tab {
+  font-family: 'Montesserat', sans-serif;
+  font-size:16px;
+}
+
+h1 {
     font-family: 'Montserrat', 'sans-serif' !important;
-    color: #005f86 !important;
-    font-weight: 900;
-    font-size: 20px !important;
+    color: #215F72  !important;
+    font-weight: 700;
+    font-size: 22px !important;
+    text-transform: uppercase;
+}
+
+
+h5 {
+    font-family: 'Open Sans', 'sans-serif' !important;
+    color: #00A1BF   !important;
+    font-weight: bold;
+    font-size: 15px !important;
     text-transform: uppercase;
     font-weight: bold !important;
     line-height: 40px;
-}
+    letter-spacing: .03em;}
 
 td {
   padding: 5px;
@@ -23,82 +43,96 @@ td {
 
 .navbar {
   border-top: 5px solid #005f86;
+  color: #eeeeee;
+}
+.navbar-bg-white {
+  background-color:#eeeeee;
 }
 
 .navbar-brand {
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
   font-size: 26px !important;
-  color: #bf5700 !important;
+  color: #BF5700  !important;
 }
 
-#read-chart, #task-chart text {
-  fill: white !important;
-  font: 12x 'Open Sans';
-  font-weight: bold;
-  text-anchor: end !important;
-}
+#read-chart, #task-chart text {   
+  fill: white !important;   
+  font: 14px 'Open Sans';   
+  text-anchor: end !important; } 
 
 #read-d-chart, #task-d-chart text {
-  fill: black !important;
-  font: 12x 'Open Sans';
-  font-weight: bold;
+  fill: gray !important;
+  font: 14px 'Roboto';
   text-anchor: end !important;
 }
 
 .pdf {
-  font: 12px 'Open Sans';
-  font-weight: 200;
+  font: 14px 'Roboto';
   text-align: left;
 }
 
 .sales {
   font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700;
+  font-size: 36px !important;
+  color: #FF8219 !important;
+}
+
+.sales2 {
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 700;
   font-size: 36px !important;
   color: #c0c0c0 !important;
 }
 
 td > .calendar-task {
   text-align: center;
-  line-height: 14px !important;
-  font: 13px 'Open Sans', sans-serif;
-  color: red;
-  font-weight: bold;
+  line-height: 15px !important;
+  font: 14px 'Roboto', sans-serif;
+  color: #BF6000;
 }
 
 td > .calendar-event {
   text-align: center;
-  line-height: 14px !important;
-  font: 13px 'Open Sans', sans-serif;
-  font-weight: bold;
+  line-height: 15px !important;
+  font: 14px 'Roboto', sans-serif;
+  color: #215F72;
 }
 
 .table-head {
-  font-family: 'Montserrat', sans-serif;
-  border: none;
-  color: white;
-  background-color: #c0c0c0;
+  font-family: 'Montserrat', sans-serif !important;
+  background-color: #215F72;
+  font-weight: 500 !important;
   text-align: center;
-  text-transform: uppercase;
-  font-size: 11px;
+  text-transform: uppercase !important;
+  color:white;
+  font-size: 12px !important;
 }
 
 .calendar-header {
   font-family: 'Open Sans', 'sans-serif';
   font-size: 14px;
+  color:white !important;
   font-weight: bold;
-  align: center;
+  text-align: center;
   text-transform: uppercase;
-  text-decoration: underline;}
+  text-decoration: underline;
+}
 
-.calendar{
+.calendar {
   vertical-align: top;
   align: center;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #215F72;
 
 }
 
 .btn-primary {
   background-color: #005f86;
   border: none;
+}
+
+h4 {
+  color: #a0a0a0;
+}
 }

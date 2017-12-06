@@ -10,18 +10,17 @@
         <div class="card">
           <div class="card-body">
             <!-- POSTS GO HERE -->
-            <h3>Post</h3>
+            <h1>Post</h3>
             <h4 class="card-title">{{ post.title }}</h4>
             <h6 class="card-subtitle mb-2 text-muted">Posted on {{ post.date.strftime('%a, %m.%d.%y') }} | Filed under {{ post.category.name }}</h6>
             <div class='pdf'>
              {% if post.pdf_url %}
                   <img src='/static/images/pdf.png' width='25px'> <a href="{{ post.pdf_url }}">{{ post.pdf_url }}</a>
-                  {% else %}
-                  no pdf
+        
                   {% endif %}
                 </div>
             <br>
-            <p>{{ post.text }}</p>
+            <div class='post'>{{ post.text }}</div>
             <!-- END POSTS SECTION -->
           </div>
         </div>
@@ -30,7 +29,7 @@
           <!-- TASKS SECTION -->
           <div class='card'><div class='card-body'>
           {% if post.tasks %}
-            <h3>Tasks</h3>
+            <h1>Tasks</h3>
             This task is due on <b>{{ task.deadline.strftime('%a, %m.%d.%y') }}</b><br>
             Status: 
             {% if task.is_complete == False %}
@@ -39,11 +38,13 @@
                            <span class="badge badge-secondary">COMPLETED</span> on
  {{ task.complete_date.strftime('%a, %m.%d.%y') }}
             {% endif %}
+<br>
+{% if task.emp_id == '09332' %}
 
-            {% if task.emp_id == session['emp_id'] %}
+            {% elif task.emp_id == session['emp_id'] %}
               <br>This post is assigned to you.
             {% elif task.emp_id %}
-                This task is already assigned to {{ task.employee.fname }}.
+                Assigned to {{ task.employee.fname }} {{ task.employee.lname }}
             {% else %}
                 Assign this task to an associate:
                 <form action='/assign-task' method='post'>
@@ -52,9 +53,9 @@
                     {% for employee in task.store.employees %}
                     <option value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}</option>
                     {% endfor %}
-                  </select>
+                  </select><br>
                     <input type='hidden' name='post_id' value='{{ post.post_id }}'>
-                    <input type='submit'>
+                    <input class="btn btn-secondary btn-sm" type='submit'>
                 </form>
             {% endif %}
 
@@ -64,12 +65,12 @@
           </div></div><!--card and body -->
          <!-- END TASK SECTION -->
 
-
+<br>
  <div class="card">
           <div class="card-body">
   {% if session.get('pos_id') == '01-SM' %}
 
-            <h3>Who has read this post?</h3>
+            <h1>Who has read this post?</h3>
                   <small>
                     {% for emp in emps_read %}
                     <input type='checkbox' checked disabled>{{ emp.fname }}<br>
@@ -81,7 +82,7 @@
 
         {% if session.get('pos_id') == '02-AM' %}
 
-            <h3>Who has read this post?</h3>
+            <h1>Who has read this post?</h3>
                   <small>
                     {% for emp in emps_read %}
                     <input type='checkbox' checked disabled>{{ emp.fname }}<br>
@@ -98,12 +99,11 @@
       {% endif %}
 
       {% if session.get('pos_id') == '99-HQ' %}
-      <h3>Post Statistics</h3>
-      <small>All Company</small><br>
+      <h1>Company Statistics</h3>
       <table width='100%'><tr><td align='center'>
-        READ COMPLIANCE<br>
+        <h5 style='font-size:13px !important'>Read Compliance</h5>
       <svg id='read-circle-chart' width='120' height='120'></td><td align='center'>
-        TASK COMPLETION<br>
+        <h5 style='font-size:13px !important'>Task Completion</h5>
               <svg id='task-circle-chart' width='120' height='120'></td></tr></table>
 
 

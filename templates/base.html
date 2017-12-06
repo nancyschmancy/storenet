@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
     <script src="https://d3js.org/d3.v3.min.js"></script> 
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:700,900|Open+Sans" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,500,700,800|Open+Sans:300,400,700|Roboto:300,400,500,700" rel="stylesheet">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
     <link rel='stylesheet' type='text/css' href='/static/style.css'>
 </head>
@@ -17,7 +18,7 @@
 <div class='container-fluid'>
 <!-- BOOTSTRAP 4.0 -->
 
-<nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-light navbar-bg-white">
   <a class="navbar-brand" href='/'>STORENET</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
     <span class="navbar-toggler-icon"></span>
@@ -34,7 +35,7 @@
             <a class="dropdown-item" href="/create-post">Create a Post</a>
             <a class="dropdown-item" href="/create-event">Create an Event</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Something else here</a>
+            <a class="dropdown-item" href="/view-stores">View Stores</a>
           </div>
         </li>
       {% endif %}
@@ -48,13 +49,13 @@
             <a class="dropdown-item" href="/create-post">Create a Post</a>
             <a class="dropdown-item" href="/create-event">Create an Event</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Something else here</a>
+            <a class="dropdown-item" href="/stores">View Stores</a>
           </div>
         </li>
       {% endif %}
 
       {% if session.get('pos_id') == '99-HQ' %}
-        <li class="nav-item dropdown">
+        <li class="nav-item active dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             Admin menu
           </a>
@@ -62,19 +63,18 @@
             <a class="dropdown-item" href="/create-post">Create a Post</a>
             <a class="dropdown-item" href="/create-event">Create an Event</a>
             <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="#">Something else here</a>
+            <a class="dropdown-item" href="/view-stores">View Stores</a>
           </div>
         </li>
       {% endif %}
       <li class="nav-item">
-        <a class="nav-link" href="/district-metrics">District Metrics</a>
+        <a class="nav-link" href="/district-metrics"></a>
       </li>
     </ul>
     <form action='/search' method='get' class="form-inline my-2 my-lg-0">
       <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name='search-term'>
       <button class="btn btn-outline-secondary my-2 my-sm-0" type="submit">Search</button>
       <ul class="navbar-nav mr-auto">
-    <li class="nav-item my-2 my-lg-0">
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <b>{{ session['name'] }}</b>
@@ -117,7 +117,6 @@ ALL THE STUFF GOES HERE!
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
 
 </body>
-
 
 
 

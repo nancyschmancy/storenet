@@ -51,7 +51,6 @@ def index():
         metrics = get_store_metrics(session['store_id'])
         calendar = get_calendar(datetime.now().isoweekday())  # Returns weekday number
         
-        print assigned_posts
         return render_template('homepage.html', assigned_posts=assigned_posts,
                                incomplete_tasks=incomplete_tasks,
                                categories=categories, current_date=datetime.now(),
@@ -155,7 +154,6 @@ def insert_post():
 
     # Determine who sees this post. This is a list of stores.
     audience = request.form.getlist('audience')
-    print audience
     # Add each employee from audience to assigned_post table:
     for store in audience:
         # Sales associates (03-SS) are excluded from seeing posts unless
@@ -222,7 +220,6 @@ def view_post(post_id):
         task = None
 
     db.session.commit()
-    print session['emp_id']
     return render_template('view-post.html', post=post, task=task,
                            emps_read=emps_read, emps_not_read=emps_not_read)
 
@@ -284,7 +281,7 @@ def post_event():
     for store in stores:
         event = Event(desc=event_desc, date=event_date, store_id=store)
         db.session.add(event)
-
+        print event_desc, event_date
     db.session.commit()
 
     flash('Event added')
@@ -411,7 +408,7 @@ def get_employee_read_metrics(emp_id):
     data = [{'name': 'task compliance',
             'value': num_assigned_posts_read,
             'max': num_assigned_posts,
-            'percent': (float(num_assigned_posts_read) / num_assigned_posts) * 100
+            'percent': int((float(num_assigned_posts_read) / num_assigned_posts) * 100)
              }]
 
     read_dict = {'data': data,
@@ -430,7 +427,6 @@ def get_store_task_completion(store_id):
                                        Task.is_complete.is_(True)).count()
     all_tasks = Task.query.filter(Task.store_id == store_id,
                                   Task.is_complete.is_(True)).count()
-    print tasks_complete, all_tasks
     data = [{'name': 'task compliance',
             'value': tasks_complete,
             'max': all_tasks,
@@ -477,7 +473,7 @@ def get_district_task_metrics():
 
     data = []
     districts = District.query.all()
-    for district in districts:
+    for district in districts[:-1]:
         data_dict = {}
         district_id = district.district_id
         complete_tasks = (db.session.query(Task)
@@ -502,7 +498,7 @@ def get_district_read_metrics():
 
     data = []
     districts = District.query.all()
-    for district in districts:
+    for district in districts[:-1]:
         data_dict = {}
         district_id = district.district_id
         read_assigned_posts = (db.session.query(AssignedPost)
@@ -704,7 +700,7 @@ def allowed_file(filename):
 
 
 if __name__ == "__main__":
-    app.debug = True
+    app.debug = False
     app.jinja_env.auto_reload = app.debug
     connect_to_db(app)
 

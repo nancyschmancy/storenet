@@ -9,14 +9,25 @@
   <div class="col-xs-12 col-md-3 col-lg-3">
     <div class="card">
       <div class="card-body">
-      <h3>Store Dashboard</h3>
-      <small>Store {{ session['store_id'] }} - {{ store.name }}</small><br><br>
-      <b>Today's Sales Projections</b><br>
-      <span class='sales'>${{ metrics['fake_proj'] }}</span><br><br>
-      <b>Current Sales</b><br>
-      <span class='sales'>${{ metrics['fake_sales'] }}</span><br><br>
-      <b>Current Weather for {{ weather.place }}</b><br>
-      <img src="{{ weather.icon }}"> {{ weather.desc }}
+      <h1>Store Dashboard</h1><center>
+      {{ store.store_id }} {{ store.name }}<br>
+      <h5>Current Weather for {{ weather.place }}</h5>
+      <img src="{{ weather.icon }}"><br>{{ weather.desc }}
+      {% if session.get('pos_id') == '99-HQ' %}
+      <h5>Total Company Sales Projections</h5>
+
+      <span class='sales2'>$877,902</span>
+      <h5>Current Sales</h5>
+      <span class='sales2'>$634,129</span>
+
+      {% else %}
+        <h5>Today's Sales Projections</h5>
+
+      <span class='sales2'>${{ metrics['fake_proj'] }}</span>
+      <h5>Current Sales</h5>
+      <span class='sales2'>${{ metrics['fake_sales'] }}</span></center>
+      {% endif %}
+
       </div> <!--card-body-->
     </div> <!--card -->
   </div> <!--col-->
@@ -26,29 +37,33 @@
     <div class="card-body">
 
       <nav class="nav nav-tabs" id="myTab" role="tablist">
-        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true"><h3>New Posts</h3></a>
-        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false"><h3>Calendar</h3></a>
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true"><span class='tab'>New Posts</span>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false"><span class='tab'>Calendar</span>   </a>
       </nav>
       <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
         <!-- NEW POSTS SECTION -->
-        <br>
+        <br><table width='100%' cellspacing='10'>
           {% if assigned_posts %}
             {% for assigned_post in assigned_posts %}
+            <tr><td>
               {% if assigned_post.was_read == False %}
-              <span class="badge badge-success">NEW</span>
+              <span class="badge badge-warning">NEW</span>
               {% endif %}
-            <a href='/posts/{{ assigned_post.post_id }}'>{{ assigned_post.post.title }}</a><br>
-            <small>Posted on {{ assigned_post.post.date.strftime('%a, %m.%d.%y') }}
-              {% if assigned_post.post.tasks %}
-              | <a href="#" class="badge badge-secondary">Action Required</a>
-              {% endif %}
-            </small><br><br>
+            <a href='/posts/{{ assigned_post.post_id }}'>{{ assigned_post.post.title }}</a>
+          </td><td align='right'>
+            <small>  {% if assigned_post.post.tasks %}
+              <a href="#" class="badge badge-secondary">Action Required</a> | 
+              {% endif %} posted on {{ assigned_post.post.date.strftime('%a, %m.%d.%y') }}
+            
+            </small></td></tr>
             {% endfor %}
           {% else %}
             There are no posts.
           {% endif %}
-          <a href="#" class="btn btn-primary">View more posts</a>
+        </table>
+        <br>
+          <a href="#" class="btn btn-outline-secondary">View more posts</a>
         <!-- END NEW POSTS SECTION -->
         </div>
         <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
@@ -120,20 +135,20 @@
       <!-- TASKS SECTION -->
 {% if emp_incomplete_tasks %}
     <div class="card">
-      <div class="card-body" style='background-color: #ffcc99'>
-<h3>Your Tasks      <span class="badge badge-pill badge-danger">{{ emp_incomplete_tasks|length }}</span> </h3>
+      <div class="card-body" style='border: 1px #BF6000 solid; background-color: peach'>
+<h1>Your Tasks      <span class="badge badge-pill badge-danger">{{ emp_incomplete_tasks|length }}</span> </h1>
 
           <form action='/complete-task' method='post'>
         {% for task in emp_incomplete_tasks %}
           <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
           <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a><br>
 {% if (task.deadline - current_date).days < 0 %}
-        <span style='color: red'>overdue by {{ -(task.deadline - current_date).days }} days</span>
+        <small><span style='color: red'><b>overdue by {{ -(task.deadline - current_date).days }} days</b></span></small>
         {% else %}
-        due in {{ (task.deadline - current_date).days }} days
+        <small>due in {{ (task.deadline - current_date).days }} days</small>
         {% endif %}
           <br>
-        {% endfor %}
+        {% endfor %}<br> 
           <button class="btn btn-default" type="submit" value="Mark Complete">Mark Complete</button>
         </form>
 </div></div><!--card-->
@@ -143,16 +158,26 @@
 
     <div class="card">
       <div class="card-body">
+ {% if session.get('pos_id') == '99-HQ' %}
 
-      <h3>Task Manager</h3>
+        
+   <h1>Read Compliance</h1>
+          <h5>All Districts</h5>
+          <svg id='read-d-chart'></svg>   
+<br><br>
+            <h1>Task Completion</h1>
+          <h5>All Districts</h5>
+           <svg id='task-d-chart'></svg>
+{% else %}
+      <h1>Store Tasks <span class="badge badge-pill badge-warning">{{ incomplete_tasks|length }}</span></h1>
       {% if incomplete_tasks %}
-      <small>Incomplete Tasks for Store {{ session['store_id'] }}</small>
-      <span class="badge badge-pill badge-warning">{{ incomplete_tasks|length }}</span></h6>
+      
+      
         {% for task in incomplete_tasks %}
         <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a><br>
         <small>
         {% if (task.deadline - current_date).days < 0 %}
-        <span style='color: red'>overdue by {{ -(task.deadline - current_date).days }} days</span>
+        <span style='color: red'><b>overdue by {{ -(task.deadline - current_date).days }} days</b></span>
         {% else %}
         due in {{ (task.deadline - current_date).days }} days
         {% endif %}
@@ -162,11 +187,10 @@
       {% else %}
       Your store is up to date on all tasks.
       {% endif %}
-      <br><br>
 
-      {% for task in metrics['unassigned_tasks'] %}
-        {{ task.desc }}
-      {% endfor %}
+ 
+
+      {% endif %}
 
       <div id="content"></div>
 
@@ -175,5 +199,72 @@
     </div>
   </div>
 </div>
+
+
+
+
+<!-- D3 Data Visualization here-->
+<script type="text/javascript">
+  'use strict';
+
+
+function createChart(url) {
+
+  d3.json(url, function (results) {
+      console.log(results)
+      let data = results.data
+      let formatPercent = d3.format('.0%');
+
+      let chartWidth = 400,
+          barHeight = 30;
+
+      let scale = d3.scale.linear()
+          .domain([0, 100])
+          .range([0, chartWidth]);
+
+      let color = d3.scale.linear()
+          .domain([0, 100])
+          .range(['orange', 'steelblue']);
+
+      let chart = d3.select(results.div)
+          .attr('width', chartWidth)
+          .attr('height', barHeight * data.length)
+
+      let axis = d3.svg.axis()
+          .ticks(3)
+          .scale(scale);
+
+      let bar = chart.selectAll('g')
+          .data(data)
+          .enter().append('g')
+          .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
+                    .text((d) => d.district);
+
+
+      bar.append('rect')
+          .attr('width', 0)
+          .transition()
+          .duration(1000)
+          .attr('width', (d) => scale(d.percent))
+          .attr('height', barHeight - 3)
+          .attr('fill', (d) => color(d.percent));
+
+
+      bar.append('text')
+          .attr('x', (d) => scale(d.percent) + 100)
+          .attr('y', barHeight / 2)
+          .attr('dy', '.2em')
+          .text((d) => d.district + ' ' + formatPercent(d.percent/100));
+
+      chart.append('g')
+          .attr('transform', 'translate(0, 50)')
+        });
+}
+
+createChart('/districts/read-compliance.json');
+createChart('/districts/task-completion.json')
+
+</script>
+
 
 {% endblock %}

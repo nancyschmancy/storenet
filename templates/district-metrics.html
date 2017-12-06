@@ -1,0 +1,89 @@
+  {% extends 'base.html' %}
+
+  {% block title %}Storenet | District Metrics{% endblock %}
+
+  {% block body %}
+  <br>
+  <div class='container-fluid'>
+    <div class="row">
+      <div class="col-xs-12 col-md-4 col-lg-5 offset-1">
+        <div class="card">
+          <div class="card-body">
+
+          <!-- DATA VIZ -->
+          <h3>Post Views (All Districts)</h3>
+           <svg id='read-d-chart'></svg>
+         </div></div></div>
+
+               <div class="col-xs-12 col-md-5 col-lg5">
+        <div class="card">
+          <div class="card-body">
+            <h3>Task Completion (All Districts)</h3>
+           <svg id='task-d-chart'></svg>
+</div></div></div></div></div>
+
+<!-- D3 Data Visualization here-->
+<script type="text/javascript">
+  'use strict';
+
+
+function createChart(url) {
+
+  d3.json(url, function (results) {
+      console.log(results)
+      let data = results.data
+      let formatPercent = d3.format('.0%');
+
+      let chartWidth = 500,
+          barHeight = 75;
+
+      let scale = d3.scale.linear()
+          .domain([0, 100])
+          .range([0, chartWidth]);
+
+      let color = d3.scale.linear()
+          .domain([0, 100])
+          .range(['orange', 'steelblue']);
+
+      let chart = d3.select(results.div)
+          .attr('width', chartWidth)
+          .attr('height', barHeight * data.length * 2.5)
+
+      let axis = d3.svg.axis()
+          .ticks(3)
+          .scale(scale);
+
+      let bar = chart.selectAll('g')
+          .data(data)
+          .enter().append('g')
+          .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
+                    .text((d) => d.district);
+
+
+      bar.append('rect')
+          .attr('width', 0)
+          .transition()
+          .duration(1000)
+          .attr('width', (d) => scale(d.percent))
+          .attr('height', barHeight - 3)
+          .attr('fill', (d) => color(d.percent));
+
+
+      bar.append('text')
+          .attr('x', (d) => scale(d.percent) + 150)
+          .attr('y', barHeight / 2)
+          .attr('dy', '.2em')
+          .text((d) => d.district + ' ' + formatPercent(d.percent/100));
+
+      chart.append('g')
+          .attr('transform', 'translate(0, 50)')
+        });
+}
+
+createChart('/districts/read-compliance.json');
+createChart('/districts/task-completion.json')
+
+</script>
+
+
+{% endblock %}

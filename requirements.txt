@@ -4,6 +4,7 @@ chardet==3.0.4
 chromedriver==2.24.1
 click==6.7
 docutils==0.14
+EasyProcess==0.2.3
 Faker==0.8.6
 Flask==0.12.2
 Flask-DebugToolbar==0.10.1
@@ -23,3 +24,4 @@ SQLAlchemy==1.1.15
 text-unidecode==1.0
 urllib3==1.22
 Werkzeug==0.12.2
+xvfbwrapper==0.2.9
