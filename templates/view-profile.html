@@ -4,44 +4,53 @@
 
 {% block body %}
 
-<h3>Details for {{ obj.fname }} {{ obj.lname}}</h3>
+ <br>
+  <div class='container-fluid'>
+    <div class="row">
+      <div class="col-xs-12 col-md-4 col-lg-4 offset-2">
+        <div class="card">
+          <div class="card-body">
+
+
+<h3>Employee Information</h3>
+<h4>Details for {{ obj.fname }} {{ obj.lname}}</h4>
+
+
 
 <ul>
-    <li>{{ obj.fname }} {{ obj.lname }}</li>
-    <li><b>Employee ID:</b> {{ obj.emp_id }}</li>
-    <li><b>Position:</b>{{ obj.pos_id }} - {{ obj.position.title }}</li>
-    <li><b>SSN:</b> {{ obj.ssn }}</li>
-    <li>Store {{ obj.store.store_id }} {{ obj.store.name }}</li>
-    <li>District {{ obj.store.district.name }}</li>
-    <li>{{ obj }}</li>
+    <li><b>Employee ID </b>{{ obj.emp_id }}</li>
+    <li><b>Store </b>{{ obj.store.store_id }} {{ obj.store.name }}</li>
+    <li><b>District </b>{{ obj.store.district.name }}</li>
+    <li><b>Position </b>{{ obj.pos_id }} - {{ obj.position.title }}</li>
+    <li><b>SSN </b>xxx-xxx{{ obj.ssn[6:] }}</li>
 </ul>
+</div></div></div>
+     <div class="col-xs-12 col-md-4 col-lg-4">
+        <div class="card">
+          <div class="card-body">
+<h3>Performance Scorecard</h3>
 
-This associate has completed
-<b>{{ complete_tasks_count }}</b> tasks
-since <b>{{ oldest_date }}<b/>. 
-<br>Average completion time: {{ rating }}
+<table width='100%'><tr><td width='50%' align='center'>
+Completed
+<div class='sales'>{{ complete_tasks_count }}</div> 
+tasks since {{ oldest_date.date() }}
+</td><td width='50%' align='center'>
+Average completion time
+<div class='sales'>{{ rating }}</div><br>
+</td></tr></table>
 
+<hr>
 
-{% if incomplete_tasks %}
-          <form action='/complete-task' method='post'>
-        {% for task in incomplete_tasks %}
-          <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
-          <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a> due in <b>{{ (task.deadline - current_date) }}</b>
-          assigned to {{ task.emp_id }}
-          <br>
-        {% endfor %}
-          <input class="btn btn-default" type="submit" value="Mark Complete">
-        </form>
-      {% endif %}
-<br>
-task thing<br>
+<h5>Read Compliance</h5>
 
 
 <svg id='read-chart'></svg>
-<br>
+<h5>Task Completion</h5>
+
 <svg id='task-chart'></svg>
 
 
+</div></div>
 <script type="text/javascript">
 
 function createBarGraph(url) {
@@ -72,6 +81,9 @@ function createBarGraph(url) {
       .attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
 
     bar.append("rect")
+    .attr('width', 0)
+          .transition()
+          .duration(1000)
       .attr('width', (d) => scale(d.value))
       .attr("height", barHeight - 1)
       .attr('fill', (d) => color(d.value));
@@ -80,7 +92,7 @@ function createBarGraph(url) {
       .attr("x", function(d) { return scale(d.value) - 3; })
       .attr("y", barHeight / 2)
       .attr("dy", ".35em")
-      .text(function(d) { return d.percent; });
+      .text((d) => d.percent + '%');
 
   });
   };

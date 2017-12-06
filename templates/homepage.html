@@ -54,58 +54,56 @@
         <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
           <!-- BEGIN CALENDAR -->
           <br>
-                <table border=1>
+<table class='calendar'>
+  <tr>
+  {% for day in calendar[0] %}
+    <td width='14%' valign='top' align='center' class='table-head'>{{ day[0].strftime('%a') }}, {{ day[0].month }}/{{ day[0].day }}</td>
+  {% endfor%}
+  </tr>
+  <tr>
+  {% for day in calendar[0] %}
+    <td valign='top' class='calendar'>
+      {% if day[2] %}
+        {% for event in day[2] %}<br>
+          <div class='calendar-event'>{{ event.desc }}</div>
+        {% endfor %}
+      {% endif %}
 
-                <tr>
-                <td width='14%' class='table-head'>Sun</td>
-                <td width='14%' class='table-head'>Mon</td>
-                <td width='14%' class='table-head'>Tue</td>
-                <td width='14%' class='table-head'>Wed</td>
-                <td width='14%' class='table-head'>Thu</td>
-                <td width='14%' class='table-head'>Fri</td>
-                <td width='14%' class='table-head'>Sat</td>
-                </tr>
+      {% if day[1] %}
+        {% for task_due in day[1] %}<br>
+          <div class='calendar-task'>Task due: {{ task_due.desc }}</div>
+        {% endfor %}
+      {% endif %}
+      <br>
+    </td>
+  {% endfor %}
+  </tr>
 
-                <tr>
-                {% for day in calendar[0] %}
-                <td width='14%'>{{ day[0].strftime('%A') }} {{ day[0].month }} {{ day[0].day }}<br>
-                  {% if day[2] %}
-                    {% for event in day[2] %}<br>
-                    <div class='calendar-event'>{{ event.desc }}</div>
-                    {% endfor %}
-                  {% endif %}
+ <tr>
+  {% for day in calendar[1] %}
+    <td width='14%' valign='top' align='center' class='table-head'>{{ day[0].strftime('%a') }}, {{ day[0].month }}/{{ day[0].day }}</td>
+  {% endfor%}
+  </tr>
+  <tr>
+  {% for day in calendar[1] %}
+    <td valign='top' class='calendar'>
+      {% if day[2] %}
+        {% for event in day[2] %}<br>
+          <div class='calendar-event'>{{ event.desc }}</div>
+        {% endfor %}
+      {% endif %}
 
-                  {% if day[1] %}
-                    {% for task_due in day[1] %}<br>
-                    <div class='calendar-task'>Task due: {{ task_due.desc }}</div>
-                    {% endfor %}
-                  {% endif %}
+      {% if day[1] %}
+        {% for task_due in day[1] %}<br>
+          <div class='calendar-task'>Task due: {{ task_due.desc }}</div>
+        {% endfor %}
+      {% endif %}
+      <br>
+    </td>
+  {% endfor %}
+  </tr>
 
-                </td>
-                {% endfor %}
-                </tr>
-
-                 <tr>
-                {% for day in calendar[1] %}
-                <td width='14%' >{{ day[0].month }} {{ day[0].day }}<br>
-                  {% if day[2] %}
-                    {% for event in day[2] %}<br>
-                    <div class='calendar-event'>{{ event.desc }}</div>
-                    {% endfor %}
-                  {% endif %}
-
-                  {% if day[1] %}
-                    {% for task_due in day[1] %}<br>
-                    <div calss='calendar-task'>Task due: {{ task_due.desc }}</div>
-                    {% endfor %}
-                  {% endif %}
-
-                </td>
-                {% endfor %}
-                </tr>
-               
-
-                </table>
+</table>
           <!--end CALENDAR -->
         </div><!--tab pane -->
        </div>
@@ -122,16 +120,21 @@
       <!-- TASKS SECTION -->
 {% if emp_incomplete_tasks %}
     <div class="card">
-      <div class="card-body" style='background-color: yellow'>
-<h3>YOUR TAKS</h3>
+      <div class="card-body" style='background-color: #ffcc99'>
+<h3>Your Tasks      <span class="badge badge-pill badge-danger">{{ emp_incomplete_tasks|length }}</span> </h3>
+
           <form action='/complete-task' method='post'>
         {% for task in emp_incomplete_tasks %}
           <input type='checkbox' name='completed-tasks' value='{{task.task_id}}'>
-          <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a> due in <b>{{ (task.deadline - current_date) }}</b>
-          assigned to {{ task.emp_id }}
+          <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a><br>
+{% if (task.deadline - current_date).days < 0 %}
+        <span style='color: red'>overdue by {{ -(task.deadline - current_date).days }} days</span>
+        {% else %}
+        due in {{ (task.deadline - current_date).days }} days
+        {% endif %}
           <br>
         {% endfor %}
-          <input class="btn btn-default" type="submit" value="Mark Complete">
+          <button class="btn btn-default" type="submit" value="Mark Complete">Mark Complete</button>
         </form>
 </div></div><!--card-->
 <br>
@@ -143,7 +146,7 @@
 
       <h3>Task Manager</h3>
       {% if incomplete_tasks %}
-      <h6 class="card-subtitle mb-2 text-muted">Incomplete Tasks for Store {{ session['store_id'] }}
+      <small>Incomplete Tasks for Store {{ session['store_id'] }}</small>
       <span class="badge badge-pill badge-warning">{{ incomplete_tasks|length }}</span></h6>
         {% for task in incomplete_tasks %}
         <a href='posts/{{ task.post_id }}'>{{ task.desc }}</a><br>
@@ -172,13 +175,5 @@
     </div>
   </div>
 </div>
-
-View post by category:
-  {% for category in categories: %}
-    <a href='/categories/{{ category.cat_id }}'>{{ category.name }}</a> |
-  {% endfor %}
-
-
-
 
 {% endblock %}

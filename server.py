@@ -296,7 +296,7 @@ def post_event():
 def create_event():
     """ Creates an event in the database. """
 
-    stores = Store.query.all()
+    stores = Store.query.order_by(Store.store_id).all()
 
     return render_template('post-event.html', stores=stores)
 
@@ -390,11 +390,12 @@ def get_employee_task_metrics(emp_id):
     data = [{'name': 'task compliance',
             'value': num_tasks_complete,
             'max': num_tasks,
-            'percent': (float(num_tasks_complete) / num_tasks) * 100
+            'percent': int((float(num_tasks_complete) / num_tasks) * 100)
              }]
 
     task_dict = {'data': data,
-                 'div': '#task-chart'
+                 'div': '#task-chart',
+                 'color': 'steelblue'
                  }
 
     return jsonify(task_dict)
@@ -414,24 +415,26 @@ def get_employee_read_metrics(emp_id):
              }]
 
     read_dict = {'data': data,
-                 'div': '#read-chart'
+                 'div': '#read-chart',
+                 'color': 'orange'
                  }
 
     return jsonify(read_dict)
 
 
-@app.route('/store/<store_id>/metrics.json')
+@app.route('/store/<store_id>/task-completion.json')
 def get_store_task_completion(store_id):
     """ Returns store metrics for data visualization & store info page """
 
     tasks_complete = Task.query.filter(Task.store_id == store_id,
-                                                  Task.is_complete.is_(True)).all()
+                                       Task.is_complete.is_(True)).count()
     all_tasks = Task.query.filter(Task.store_id == store_id,
-                                                        Task.is_complete.is_(True)).count()
+                                  Task.is_complete.is_(True)).count()
+    print tasks_complete, all_tasks
     data = [{'name': 'task compliance',
             'value': tasks_complete,
             'max': all_tasks,
-            'percent': (float(tasks_complete) / all_tasks) * 100
+            'percent': int(float(tasks_complete) / all_tasks * 100)
              }]
 
     task_dict = {'data': data,
@@ -441,7 +444,7 @@ def get_store_task_completion(store_id):
     return jsonify(task_dict)
 
 
-@app.route('/store/<store_id>/metrics.json')
+@app.route('/store/<store_id>/read-compliance.json')
 def get_store_read_compliance(store_id):
     """ Returns store metrics for data visualization & store info page """
 
@@ -458,7 +461,7 @@ def get_store_read_compliance(store_id):
     data = [{'name': 'read compliance',
             'value': posts_read,
             'max': all_posts,
-            'percent': (float(posts_read) / all_posts) * 100
+            'percent': int((float(posts_read) / all_posts) * 100)
              }]
 
     read_dict = {'data': data,
@@ -488,7 +491,7 @@ def get_district_task_metrics():
         data_dict['percent'] = (float(complete_tasks)/all_tasks)*100
         data.append(data_dict)
 
-    task_dict = {'data': data, 'div': '#task-chart'}
+    task_dict = {'data': data, 'div': '#task-d-chart'}
 
     return jsonify(task_dict)
 
@@ -517,7 +520,7 @@ def get_district_read_metrics():
         data_dict['percent'] = (float(read_assigned_posts)/all_assigned_posts)*100
         data.append(data_dict)
 
-    read_dict = {'data': data, 'div': '#read-chart'}
+    read_dict = {'data': data, 'div': '#read-d-chart'}
 
     return jsonify(read_dict)
 
@@ -532,10 +535,10 @@ def get_task_metrics(post_id):
     data = {'name': 'task completion',
             'value': complete_tasks,
             'max': all_tasks,
-            'percent': float(complete_tasks) / all_tasks * 100
+            'percent': int(float(complete_tasks) / all_tasks * 100)
             }
 
-    task_dict = {'data': data, 'div': '#task-chart'}
+    task_dict = {'data': data, 'div': '#task-circle-chart', 'color': 'steelblue'}
 
     return jsonify(task_dict)
 
@@ -551,11 +554,12 @@ def get_read_metrics(post_id):
     data = {'name': 'read compliance',
             'value': read_assigned_posts,
             'max': all_assigned_posts,
-            'percent': float(read_assigned_posts) / all_assigned_posts * 100
+            'percent': int(float(read_assigned_posts) / all_assigned_posts * 100)
             }
 
     read_dict = {'data': data,
-                 'div': '#read-chart'
+                 'div': '#read-circle-chart',
+                 'color': 'orange'
                  }
 
     return jsonify(read_dict)
@@ -625,14 +629,16 @@ def avg_task_completion(task_list_obj):
 
     avg = sum(task_speed_list)/len(task_speed_list)
 
-    days = avg // 86400
+    days = int(avg // 86400)
     secs_days = avg % 86400
     hours = int(secs_days // 3600)
     secs_hours = secs_days % 3600
     minutes = int(secs_hours // 60)
 
-    if days != 0:
-        return '{} days, {}:{}'.format(days, hours, minutes)
+    if days == 1:
+        return '{} day, {}:{:02d}'.format(days, hours, minutes)
+    elif days != 0:
+        return '{} days, {}:{:02d}'.format(days, hours, minutes)
     else:
         return '{}:{}'.format(hours, minutes)
 

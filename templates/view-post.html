@@ -31,22 +31,23 @@
           <div class='card'><div class='card-body'>
           {% if post.tasks %}
             <h3>Tasks</h3>
-            This task is due on <b>{{ task.deadline }}</b>. Status: 
+            This task is due on <b>{{ task.deadline.strftime('%a, %m.%d.%y') }}</b><br>
+            Status: 
             {% if task.is_complete == False %}
                 <span class="badge badge-danger">INCOMPLETE</span>
-
             {% else %}
-                Completed on {{ task.complete_date }}
+                           <span class="badge badge-secondary">COMPLETED</span> on
+ {{ task.complete_date.strftime('%a, %m.%d.%y') }}
             {% endif %}
 
             {% if task.emp_id == session['emp_id'] %}
-              This post is assigned to you.
+              <br>This post is assigned to you.
             {% elif task.emp_id %}
                 This task is already assigned to {{ task.employee.fname }}.
             {% else %}
                 Assign this task to an associate:
                 <form action='/assign-task' method='post'>
-                  <select name='assignee' required>
+                  <select name='assignee' class="form-control form-control-sm" required>
                     <option selected disabled value="">Select an Employee</option>
                     {% for employee in task.store.employees %}
                     <option value='{{ employee.emp_id }}'>{{ employee.fname }} {{ employee.lname }} - {{ employee.position.title }}</option>
@@ -62,8 +63,12 @@
           {% endif %}
           </div></div><!--card and body -->
          <!-- END TASK SECTION -->
-        <div class="card">
+
+
+ <div class="card">
           <div class="card-body">
+  {% if session.get('pos_id') == '01-SM' %}
+
             <h3>Who has read this post?</h3>
                   <small>
                     {% for emp in emps_read %}
@@ -72,20 +77,49 @@
                     {% for emp in emps_not_read %}
                     <input type='checkbox' disabled>{{ emp.fname }}<br>
                     {% endfor %}
+      {% endif %}
+
+        {% if session.get('pos_id') == '02-AM' %}
+
+            <h3>Who has read this post?</h3>
+                  <small>
+                    {% for emp in emps_read %}
+                    <input type='checkbox' checked disabled>{{ emp.fname }}<br>
+                    {% endfor %}
+                    {% for emp in emps_not_read %}
+                    <input type='checkbox' disabled>{{ emp.fname }}<br>
+                    {% endfor %}
+      {% endif %}
+
+      {% if session.get('pos_id') == '10-DM' %}
+      <table><tr><td align='center'>
+      <svg id='read-chart' width='120' height='120'></td><td align='center'>
+              <svg id='task-chart'  width='120' height='120'></td></tr></table>
+      {% endif %}
+
+      {% if session.get('pos_id') == '99-HQ' %}
+      <h3>Post Statistics</h3>
+      <small>All Company</small><br>
+      <table width='100%'><tr><td align='center'>
+        READ COMPLIANCE<br>
+      <svg id='read-circle-chart' width='120' height='120'></td><td align='center'>
+        TASK COMPLETION<br>
+              <svg id='task-circle-chart' width='120' height='120'></td></tr></table>
+
+
+      {% endif %}
                   </small>
           </div></div><!--card body and card--> 
+
+
+
+
+
+       
+
                
 
-          <!-- DATA VIZ -->
-          <h3>Post Views (all company)</h3>
-          <a href='/logout'>Log Out</a>
-                <div id="content"></div>
-
-           <svg id='read-chart'></svg>
-            <h3>Task completion (all_company)</h3>
-           <svg id='task-chart'></svg>
-           <svg id='dis'></svg>
-          <!-- END DATA VIZ -->
+        
           </div>
         </div>
       </div>
@@ -111,7 +145,7 @@ function createRadialChart(url) {
   let startPercent = 0;
   let endPercent = results.data.percent/100;
   let formatPercent = d3.format('.0%');
-  let canvas = radius * 2 + 10;
+  let canvas = radius * 2 + 5;
 
   let count = Math.abs((endPercent - startPercent) / 0.01);
   let step = endPercent < startPercent ? -0.01 : 0.01;
@@ -140,17 +174,18 @@ function createRadialChart(url) {
     .attr('d', arc.endAngle(Math.PI * 2));
 
   let foreground = innerCircle.append('path')
-    .attr('fill', color)
-    .attr('stroke', color)
+    .attr('fill', results.color)
+    .attr('stroke', results.color)
     .attr('stroke-width', 5)
 
   let front = innerCircle.append('path')
     .attr('class', 'foreground')
-    .attr('fill', color())
+    .attr('fill', results.color)
 
   let text = innerCircle.append('text')
-    .attr('fill', 'black')
+    .attr('fill', results.color)
     .attr('text-anchor', 'middle')
+    .attr('style', 'font-weight: bold')
     .attr('dy', '.35em')
 
   function updateProgress(progress) {
@@ -175,59 +210,6 @@ function createRadialChart(url) {
 createRadialChart('/posts/{{ post.post_id }}/read-compliance.json')
 createRadialChart('/posts/{{ post.post_id }}/task-completion.json')
 
-
-function createChart(url) {
-
-  d3.json(url, function (results) {
-      
-      let data = results
-      let formatPercent = d3.format('.0%');
-
-      let chartWidth = 500,
-          barHeight = 75;
-
-      let scale = d3.scale.linear()
-          .domain([0, 100])
-          .range([0, chartWidth]);
-
-      let color = d3.scale.linear()
-          .domain([0, 100])
-          .range(['orange', 'steelblue']);
-
-      let chart = d3.select('#dis')
-          .attr('width', chartWidth)
-          .attr('height', barHeight * data.length * 2.5)
-
-      let axis = d3.svg.axis()
-          .ticks(3)
-          .scale(scale);
-
-      let bar = chart.selectAll('g')
-          .data(data)
-          .enter().append('g')
-          .attr('transform', (d, i) => 'translate(0,' + i * barHeight + ')')
-
-      bar.append('rect')
-          .attr('width', 0)
-          .transition()
-          .duration(1000)
-          .attr('width', (d) => scale(d.percent))
-          .attr('height', barHeight - 3)
-          .attr('fill', (d) => color(d.percent));
-
-      bar.append('text')
-          .attr('x', (d) => scale(d.percent) - 3)
-          .attr('y', barHeight / 2)
-          .attr('dy', '.2em')
-          .text((d) => d.district + ' ' + formatPercent(d.percent/100));
-
-      chart.append('g')
-          .attr('transform', 'translate(0, 50)')
-        });
-}
-
-createChart('/districts/read-compliance.json');
-createChart('/districts/task-completion.json')
 
 </script>
 

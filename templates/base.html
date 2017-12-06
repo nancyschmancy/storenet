@@ -25,15 +25,32 @@
 
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav mr-auto">
-      <li class="nav-item active">
-        <a class="nav-link" href="/view-stores">View Stores <span class="sr-only">(current)</span></a>
-      </li>
       {% if session.get('pos_id') == '01-SM' %}
-      <li><a class="nav-link" href='#'>SM only menu item</a></li>
+       <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Store Manager menu
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="/create-post">Create a Post</a>
+            <a class="dropdown-item" href="/create-event">Create an Event</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
       {% endif %}
 
       {% if session.get('pos_id') == '10-DM' %}
-      <li><a class="nav-link" href='#'>only DM can accessS - check somthing out</a>
+      <li class="nav-item active dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Store Manager menu
+          </a>
+          <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="/create-post">Create a Post</a>
+            <a class="dropdown-item" href="/create-event">Create an Event</a>
+            <div class="dropdown-divider"></div>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
       {% endif %}
 
       {% if session.get('pos_id') == '99-HQ' %}
@@ -55,10 +72,9 @@
     </ul>
     <form action='/search' method='get' class="form-inline my-2 my-lg-0">
       <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name='search-term'>
-      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      <button class="btn btn-outline-secondary my-2 my-sm-0" type="submit">Search</button>
       <ul class="navbar-nav mr-auto">
     <li class="nav-item my-2 my-lg-0">
-    <a class="nav-link disabled" href="#">Disabled</a></li>
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <b>{{ session['name'] }}</b>

@@ -3,12 +3,18 @@
 {% block title %}All Stores{% endblock %}
 
 {% block body %}
+<br>
+<div class='container-fluid'>
+    <div class="row">
+      <div class="col-xs-12 col-md-4 col-lg-6 offset-3">
+        <div class="card">
+          <div class="card-body">
 
-<h2>Store Directory</h2>
+<h3>Store Directory</h3>
 
 {% for district in districts[:-1] %} <!--Prevents Corp District from display-->
 <ul>
-<h3>{{ district.name }}</h3>
+<h4>{{ district.name }}</h4>
     {% for store in district.stores %}
     <li><b><a href='/view-stores/{{ store.store_id }}'>{{ store.store_id}} {{ store.name}}</a></b><br>
         {{ store.address }}<br>
@@ -22,4 +28,5 @@
 <p>Chuck Norris can never fill out an online form, because Chuck Norris 
     will never submit.</p>
 
+</div></div></div></div></div>
 {% endblock %}

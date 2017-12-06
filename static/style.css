@@ -9,11 +9,12 @@ div {
 
 h3 {
     font-family: 'Montserrat', 'sans-serif' !important;
-    color: steelblue !important;
+    color: #005f86 !important;
     font-weight: 900;
-    font-size: 17px !important;
+    font-size: 20px !important;
     text-transform: uppercase;
     font-weight: bold !important;
+    line-height: 40px;
 }
 
 td {
@@ -21,20 +22,27 @@ td {
 }
 
 .navbar {
-  border-top: 5px solid steelblue;
+  border-top: 5px solid #005f86;
 }
 
 .navbar-brand {
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
-  font-size: 24px !important;
-  color: orange !important;
+  font-size: 26px !important;
+  color: #bf5700 !important;
 }
 
-#chart, #tchart text {
+#read-chart, #task-chart text {
   fill: white !important;
-  font: 10px 'Open Sans';
-  font-weight: 200;
+  font: 12x 'Open Sans';
+  font-weight: bold;
+  text-anchor: end !important;
+}
+
+#read-d-chart, #task-d-chart text {
+  fill: black !important;
+  font: 12x 'Open Sans';
+  font-weight: bold;
   text-anchor: end !important;
 }
 
@@ -52,17 +60,16 @@ td {
 
 td > .calendar-task {
   text-align: center;
-  line-height: 12px !important;
-  font: 12px 'Open Sans', sans-serif;
+  line-height: 14px !important;
+  font: 13px 'Open Sans', sans-serif;
   color: red;
   font-weight: bold;
 }
 
 td > .calendar-event {
   text-align: center;
-  line-height: 12px !important;
-  font: 12px 'Open Sans', sans-serif;
-  color: steelblue;
+  line-height: 14px !important;
+  font: 13px 'Open Sans', sans-serif;
   font-weight: bold;
 }
 
@@ -70,8 +77,28 @@ td > .calendar-event {
   font-family: 'Montserrat', sans-serif;
   border: none;
   color: white;
-  background-color: orange;
+  background-color: #c0c0c0;
   text-align: center;
-  font-size: 10px
+  text-transform: uppercase;
+  font-size: 11px;
+}
 
+.calendar-header {
+  font-family: 'Open Sans', 'sans-serif';
+  font-size: 14px;
+  font-weight: bold;
+  align: center;
+  text-transform: uppercase;
+  text-decoration: underline;}
+
+.calendar{
+  vertical-align: top;
+  align: center;
+  border: 1px solid #e0e0e0;
+
+}
+
+.btn-primary {
+  background-color: #005f86;
+  border: none;
 }

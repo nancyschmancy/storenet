@@ -9,7 +9,7 @@
     <br>
     <div class="card" >
       <div class="card-header">
-      Create a Post
+      <h3>Create a Post</h3>
       </div>
       <div class="card-body">
       <!-- BEGIN CONTENT-->
@@ -31,21 +31,15 @@
     <br>
     <div class="card" >
       <div class="card-header">
-      Select audience
+      <h3>Select audience</h3>
       </div>
       <div class="card-body">
 
-        <button id='post-all'>Select All Stores</button>
-        Send to: {# put this in a for loop #}
-        <button id='post-d01' name='audience' value='D01'> District 1</button>
-        <button id='post-d02' name='audience' value='D02'> District 2</button>
-        <button id='post-d03' name='audience' value='D03'> District 3</button>
-        <button id='post-d04' name='audience' value='D04'> District 4</button>
-        <button id='post-d05' name='audience' value='D05'> District 5</button>
-        <br>
-        Or select a store:
+        <button id='post-all' type="button" class="btn btn-outline-secondary btn-sm" >Select All Stores</button><br><br>
+        
+        Or select an individual store:<br>
         {% for store in stores[:-1] %}
-        <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}'>{{ store.store_id }} {{ store.name }}<br>
+        <input type='checkbox' class='store' name='audience' value='{{ store.store_id }}'> {{ store.store_id }} {{ store.name }}<br>
         {% endfor %}
         <input type='checkbox' class='store' name='audience' value='999' checked hidden>
         <br>
@@ -56,7 +50,7 @@
     <br>
     <div class="card" >
       <div class="card-header">
-Action required?
+<h3>Action required?</h3>
       </div>
       <div class="card-body">
 
@@ -66,20 +60,22 @@ Action required?
 
         
 
-         Task required? <input id='task-required-checkbox' type='checkbox' name='has_task'>
+         <input id='task-required-checkbox' type='checkbox' name='has_task'> Task required <br>
 
         <div id='task-assign-section'>
           Task item: <input class="form-control form-control-md" id='task-desc-input' class='text-input' type='text/css' name='task_item' maxlength='50'>
-          Deadline: <input id='task-deadline-input' type='date' name='deadline'>
-        </div>   
+          Deadline: <input class="form-control form-control-md" id='task-deadline-input' type='date' name='deadline'>
+        </div>   <br>
 
-          <input type='file' name='file'>
+Add an attachment:<br>
+          <button type="button" class="btn btn-outline-secondary" name='file'>Upload File</button><br>
 
           <div id='post-preview' hidden></div>
+          <br>
 
-          <button id='post-preview-button'>Preview Post</button>
+          <button type="button" class="btn btn-outline-secondary btn-lg" id='post-preview-button'>Preview Post</button>
           <button id='edit-post-button' hidden>Edit Post</button>
-          <input id='post-stuff' type='submit' value="POST!">
+          <button type="button" class="btn btn-secondary btn-lg" id='post-stuff' type='submit' value="POST!">Submit</button>
 
           
       <!-- END CONTENT -->
