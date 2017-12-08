@@ -97,10 +97,10 @@ Action required?
 $('#post-all').on('click', function (evt) {
     evt.preventDefault();
     if ($('#post-all').html() === 'Uncheck All Stores') {
-        $(':checked').removeAttr('checked');
+        $(':checked').prop('checked', false);
         $('#post-all').html('Select All Stores');
     } else if ($('#post-all').html() === 'Select All Stores') {
-        $('.store').attr('checked', true);
+        $('.store').prop('checked', true);
         $('#post-all').html('Uncheck All Stores');
     }
 });

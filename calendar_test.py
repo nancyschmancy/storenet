@@ -1,22 +1,20 @@
-from datetime import datetime, timedelta
-
+from model import (Employee, Store, Post, District, AssignedPost, Category, Task,
+                   connect_to_db, db)
+from datetime import date, datetime, timedelta
 
 def find_sunday(current_weekday):
-    """ Finds Sunday based on current day """
+    """ EXPERIMENTAL CALENDAR THING """
 
-    n_days_ago = 8 - current_weekday
-    sunday = datetime.now() - timedelta(days=n_days_ago)
-    monday = datetime.now() - timedelta(days=n_days_ago-1)
-    tuesday = datetime.now() - timedelta(days=n_days_ago-2)
-    wednesday = datetime.now() - timedelta(days=n_days_ago-3)
-    thursday = datetime.now() - timedelta(days=n_days_ago-4)
-    friday = datetime.now() - timedelta(days=n_days_ago-5)
-    saturday = datetime.now() - timedelta(days=n_days_ago-6)
+    sun = datetime.now() - timedelta(days=current_weekday)
+    mon = datetime.now() - timedelta(days=current_weekday-1)
+    tue = datetime.now() - timedelta(days=current_weekday-2)
+    wed = datetime.now() - timedelta(days=current_weekday-3)
+    thu = datetime.now() - timedelta(days=current_weekday-4)
+    fri = datetime.now() - timedelta(days=current_weekday-5)
+    sat = datetime.now() - timedelta(days=current_weekday-6)
 
-    return sunday, monday, tuesday, wednesday, thursday, friday, saturday
+    print sun
 
-current_weekday = datetime.now().isoweekday()
-print current_weekday
-print find_sunday(current_weekday)
+find_sunday(6)
 
 

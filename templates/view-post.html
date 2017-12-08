@@ -10,8 +10,19 @@
         <!-- POSTS GO HERE -->
             <div class="panel-heading">
               <h3 class="panel-title">{{ post.title }}</h3>
+              <small>Read by 
+                {% for emp in emps_read %}
+                {{ emp.fname }}
+                {% endfor %}
+              </small>
             </div>
           <div class="panel-body">
+            {% if post.pdf_url %}
+              There is an attachment associated with this post: <a href="{{ post.pdf_url }}">{{ post.pdf_url}}</a>
+              {% else %}
+              no pdf
+              {% endif %}
+
             <p>{{ post.text }}</p>
           </div>
         <!-- END POSTS SECTION -->
